@@ -81,7 +81,7 @@ export default function ImageUploadField({
           </div>
           <span className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
             <Upload className="w-4 h-4" />
-            Toca para subir foto
+            Elegir de galería o tomar foto
           </span>
           <span className="text-xs text-gray-400">JPG, PNG · máx. 10 MB</span>
         </button>
@@ -97,7 +97,6 @@ export default function ImageUploadField({
         ref={fileRef}
         type="file"
         accept="image/*"
-        capture="environment"
         onChange={handleChange}
         className="hidden"
       />
