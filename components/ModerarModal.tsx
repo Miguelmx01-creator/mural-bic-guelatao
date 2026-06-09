@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { X, Trash2, Loader2, Pencil } from 'lucide-react';
 import { type Tarjeta } from '@/lib/firestore';
 import { CATEGORIES, getCategoryById } from '@/lib/categories';
-import { uploadToCloudinary } from '@/lib/cloudinary';
+import { uploadImagesToCloudinary } from '@/lib/cloudinary';
 import { parseModerarResponse } from '@/lib/moderar-api';
 import MultiImageUploadField, { type ImagePreviewItem } from './MultiImageUploadField';
 
@@ -28,6 +28,7 @@ export default function ModerarModal({ card, onClose }: Props) {
     card.imagenUrls.map((url) => ({ id: url, src: url }))
   );
   const [loading, setLoading]           = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<string | null>(null);
   const [error, setError]               = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -67,15 +68,28 @@ export default function ModerarModal({ card, onClose }: Props) {
     }
     setLoading(true);
     setError(null);
+    setUploadStatus(null);
     try {
       const imagenUrls: string[] = [];
+      const newFiles = imageItems.filter((item) => item.file).map((item) => item.file!);
+      let uploadedNew: string[] = [];
+
+      if (newFiles.length > 0) {
+        uploadedNew = await uploadImagesToCloudinary(newFiles, (current, total) =>
+          setUploadStatus(`Subiendo imagen ${current} de ${total}…`)
+        );
+      }
+
+      let newIndex = 0;
       for (const item of imageItems) {
         if (item.file) {
-          imagenUrls.push(await uploadToCloudinary(item.file));
+          imagenUrls.push(uploadedNew[newIndex++]);
         } else if (item.src.startsWith('https://')) {
           imagenUrls.push(item.src);
         }
       }
+
+      setUploadStatus('Guardando cambios…');
 
       const updates: Record<string, string | string[] | null> = {
         categoria,
@@ -99,9 +113,18 @@ export default function ModerarModal({ card, onClose }: Props) {
     } catch (err) {
       console.error(err);
       const msg = err instanceof Error ? err.message : 'Error desconocido';
-      setError(msg.includes('Cloudinary') || msg.includes('subir') ? msg : `No se pudo guardar: ${msg}`);
+      if (msg === 'Failed to fetch' || msg.includes('fetch')) {
+        setError('Falló la conexión. Revisa tu internet e intenta de nuevo.');
+      } else {
+        setError(
+          msg.includes('Cloudinary') || msg.includes('subir') || msg.includes('conexión')
+            ? msg
+            : `No se pudo guardar: ${msg}`
+        );
+      }
     } finally {
       setLoading(false);
+      setUploadStatus(null);
     }
   };
 
@@ -185,6 +208,12 @@ export default function ModerarModal({ card, onClose }: Props) {
             <input type="password" value={pin} onChange={(e) => setPin(e.target.value)} placeholder="••••••" className={FIELD} />
           </div>
 
+          {uploadStatus && loading && (
+            <p className="text-sm text-pine-green bg-pine-green/8 border border-pine-green/20 px-3 py-2 rounded-lg">
+              {uploadStatus}
+            </p>
+          )}
+
           {error && (
             <p className="text-sm text-red-700 bg-red-50 border border-red-200 px-3 py-2 rounded-lg">{error}</p>
           )}
@@ -195,7 +224,7 @@ export default function ModerarModal({ card, onClose }: Props) {
             </button>
             <button type="button" onClick={handleSave} disabled={loading} className="flex-1 px-4 py-2.5 rounded-xl bg-pine-green text-cream text-sm font-semibold hover:bg-pine-green/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-60">
               {loading && !confirmDelete ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-              Guardar
+              {loading ? (uploadStatus ?? 'Guardando…') : 'Guardar'}
             </button>
           </div>
 

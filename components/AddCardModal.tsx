@@ -5,7 +5,7 @@ import { X, Loader2 } from 'lucide-react';
 import { CATEGORIES, getCategoryById } from '@/lib/categories';
 import { crearTarjeta } from '@/lib/firestore';
 import { normalizeComunidad } from '@/lib/utils';
-import { uploadToCloudinary } from '@/lib/cloudinary';
+import { uploadImagesToCloudinary } from '@/lib/cloudinary';
 import MultiImageUploadField, { type ImagePreviewItem } from './MultiImageUploadField';
 
 interface Props {
@@ -26,6 +26,7 @@ export default function AddCardModal({ existingCommunities, initialCategoria = '
   const [suggestions, setSuggestions]     = useState<string[]>([]);
   const [showSug, setShowSug]             = useState(false);
   const [loading, setLoading]             = useState(false);
+  const [uploadStatus, setUploadStatus]     = useState<string | null>(null);
   const [error, setError]                 = useState<string | null>(null);
 
   const selectedCat = getCategoryById(categoria);
@@ -74,10 +75,15 @@ export default function AddCardModal({ existingCommunities, initialCategoria = '
     }
     setLoading(true);
     setError(null);
+    setUploadStatus(null);
     try {
       const imagenUrls = imageItems.length
-        ? await Promise.all(imageItems.map((item) => uploadToCloudinary(item.file)))
+        ? await uploadImagesToCloudinary(
+            imageItems.map((item) => item.file),
+            (current, total) => setUploadStatus(`Subiendo imagen ${current} de ${total}…`)
+          )
         : [];
+      setUploadStatus('Guardando tarjeta…');
       await crearTarjeta({
         comunidadRaw: comunidadRaw.trim(),
         categoria,
@@ -90,9 +96,20 @@ export default function AddCardModal({ existingCommunities, initialCategoria = '
     } catch (err) {
       console.error(err);
       const msg = err instanceof Error ? err.message : 'Error desconocido';
-      setError(msg.includes('Cloudinary') || msg.includes('subir') ? msg : `No se pudo publicar: ${msg}`);
+      if (msg === 'Failed to fetch' || msg.includes('fetch')) {
+        setError(
+          'Falló la conexión al publicar. Revisa tu internet o WiFi, espera un momento e intenta de nuevo. Si tienes muchas fotos, prueba con 2–3 primero.'
+        );
+      } else {
+        setError(
+          msg.includes('Cloudinary') || msg.includes('subir') || msg.includes('conexión')
+            ? msg
+            : `No se pudo publicar: ${msg}`
+        );
+      }
     } finally {
       setLoading(false);
+      setUploadStatus(null);
     }
   };
 
@@ -235,6 +252,12 @@ export default function AddCardModal({ existingCommunities, initialCategoria = '
             />
           </div>
 
+          {uploadStatus && loading && (
+            <p className="text-sm text-pine-green bg-pine-green/8 border border-pine-green/20 px-3 py-2 rounded-lg">
+              {uploadStatus}
+            </p>
+          )}
+
           {error && (
             <p className="text-sm text-red-700 bg-red-50 border border-red-200 px-3 py-2 rounded-lg">
               {error}
@@ -255,7 +278,7 @@ export default function AddCardModal({ existingCommunities, initialCategoria = '
               className="flex-1 px-4 py-2.5 rounded-xl bg-pine-green text-cream text-sm font-semibold hover:bg-pine-green/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-              {loading ? 'Publicando…' : 'Publicar'}
+              {loading ? (uploadStatus ?? 'Publicando…') : 'Publicar'}
             </button>
           </div>
         </form>
