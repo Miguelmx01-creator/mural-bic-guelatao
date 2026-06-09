@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAdminDb } from '@/lib/firebase-admin';
 import { CATEGORIES } from '@/lib/categories';
 import { toFirestoreImages } from '@/lib/tarjeta-images';
+import { getModeratorPin } from '@/lib/server-config';
 
 const VALID_CATEGORY_IDS = new Set(CATEGORIES.map((c) => c.id));
 
@@ -10,8 +11,15 @@ export const dynamic = 'force-dynamic';
 
 // ---------- helpers ----------
 
+function jsonResponse(body: Record<string, unknown>, status: number) {
+  return new NextResponse(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json; charset=utf-8' },
+  });
+}
+
 function pinOk(pin: unknown): boolean {
-  const secret = process.env.MODERATOR_PIN;
+  const secret = getModeratorPin();
   if (!secret || typeof pin !== 'string') return false;
   // Constant-time comparison to prevent timing attacks
   if (pin.length !== secret.length) return false;
@@ -22,8 +30,9 @@ function pinOk(pin: unknown): boolean {
   return diff === 0;
 }
 
-const UNAUTHORIZED = NextResponse.json({ error: 'PIN incorrecto' }, { status: 401 });
-const BAD = (msg: string) => NextResponse.json({ error: msg }, { status: 400 });
+const UNAUTHORIZED = () => jsonResponse({ error: 'PIN incorrecto' }, 401);
+const BAD = (msg: string) => jsonResponse({ error: msg }, 400);
+const SERVER_ERROR = (msg = 'Error interno del servidor') => jsonResponse({ error: msg }, 500);
 
 // ---------- DELETE — borrar tarjeta ----------
 
@@ -32,14 +41,14 @@ export async function DELETE(req: NextRequest) {
     const body = await req.json();
     const { pin, cardId } = body ?? {};
 
-    if (!pinOk(pin)) return UNAUTHORIZED;
+    if (!pinOk(pin)) return UNAUTHORIZED();
     if (!cardId)      return BAD('cardId requerido');
 
     await getAdminDb().collection('tarjetas').doc(String(cardId)).delete();
-    return NextResponse.json({ ok: true });
+    return jsonResponse({ ok: true }, 200);
   } catch (err) {
     console.error('[moderar DELETE]', err);
-    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
+    return SERVER_ERROR();
   }
 }
 
@@ -56,7 +65,7 @@ export async function PATCH(req: NextRequest) {
     const body = await req.json();
     const { pin, cardId, updates } = body ?? {};
 
-    if (!pinOk(pin))                             return UNAUTHORIZED;
+    if (!pinOk(pin))                             return UNAUTHORIZED();
     if (!cardId)                                  return BAD('cardId requerido');
     if (!updates || typeof updates !== 'object')  return BAD('updates requerido');
 
@@ -86,9 +95,9 @@ export async function PATCH(req: NextRequest) {
     }
 
     await getAdminDb().collection('tarjetas').doc(String(cardId)).update(safe);
-    return NextResponse.json({ ok: true });
+    return jsonResponse({ ok: true }, 200);
   } catch (err) {
     console.error('[moderar PATCH]', err);
-    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
+    return SERVER_ERROR();
   }
 }

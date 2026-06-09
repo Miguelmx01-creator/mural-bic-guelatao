@@ -5,6 +5,7 @@ import { X, Trash2, Loader2, Pencil } from 'lucide-react';
 import { type Tarjeta } from '@/lib/firestore';
 import { CATEGORIES, getCategoryById } from '@/lib/categories';
 import { uploadToCloudinary } from '@/lib/cloudinary';
+import { parseModerarResponse } from '@/lib/moderar-api';
 import MultiImageUploadField, { type ImagePreviewItem } from './MultiImageUploadField';
 
 type ImageItem = ImagePreviewItem & { file?: File };
@@ -89,7 +90,7 @@ export default function ModerarModal({ card, onClose }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pin, cardId: card.id, updates }),
       });
-      const data = await res.json();
+      const data = await parseModerarResponse(res);
       if (!res.ok) {
         setError(data.error ?? 'Error al guardar.');
       } else {
@@ -114,7 +115,7 @@ export default function ModerarModal({ card, onClose }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pin, cardId: card.id }),
       });
-      const data = await res.json();
+      const data = await parseModerarResponse(res);
       if (!res.ok) {
         setError(data.error ?? 'Error al eliminar.');
       } else {

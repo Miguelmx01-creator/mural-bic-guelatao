@@ -1,5 +1,6 @@
 import { getApps, initializeApp, cert, type App } from 'firebase-admin/app';
 import { getFirestore, type Firestore } from 'firebase-admin/firestore';
+import { getFirebaseAdminCredentials } from './server-config';
 
 let _db: Firestore | null = null;
 
@@ -10,15 +11,15 @@ let _db: Firestore | null = null;
 export function getAdminDb(): Firestore {
   if (_db) return _db;
 
+  const creds = getFirebaseAdminCredentials();
   const app: App =
     getApps().length > 0
       ? getApps()[0]
       : initializeApp({
           credential: cert({
-            projectId:   process.env.FIREBASE_PROJECT_ID,
-            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-            // Vercel stores multiline env vars as literal \n — restore real newlines
-            privateKey:  process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+            projectId:   creds.projectId,
+            clientEmail: creds.clientEmail,
+            privateKey:  creds.privateKey,
           }),
         });
 
