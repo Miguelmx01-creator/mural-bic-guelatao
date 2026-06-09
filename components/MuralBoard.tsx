@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { Plus } from 'lucide-react';
+import { isFirebaseConfigured } from '@/lib/firebase';
 import { subscribeTarjetas, type Tarjeta } from '@/lib/firestore';
 import CategoryFilter from './CategoryFilter';
 import CategoryBanner from './CategoryBanner';
@@ -15,14 +16,46 @@ export default function MuralBoard() {
   const [showAdd, setShowAdd]           = useState(false);
   const [moderateCard, setModerateCard] = useState<Tarjeta | null>(null);
   const [loading, setLoading]           = useState(true);
+  const [loadError, setLoadError]       = useState<string | null>(null);
 
   // Real-time listener
   useEffect(() => {
-    const unsub = subscribeTarjetas((data) => {
-      setTarjetas(data);
+    if (!isFirebaseConfigured()) {
+      setLoadError(
+        'Faltan las variables de Firebase en el servidor. En Vercel ve a Settings → Environment Variables, agrega las 11 variables del archivo .env.example (copiando los valores de tu .env.local) y luego haz Redeploy.'
+      );
       setLoading(false);
-    });
-    return () => unsub();
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      setLoadError((prev) =>
+        prev ??
+        'La conexión con Firebase tardó demasiado. Revisa las variables de entorno en Vercel y vuelve a desplegar el proyecto.'
+      );
+      setLoading(false);
+    }, 15000);
+
+    const unsub = subscribeTarjetas(
+      (data) => {
+        window.clearTimeout(timeout);
+        setTarjetas(data);
+        setLoadError(null);
+        setLoading(false);
+      },
+      () => {
+        window.clearTimeout(timeout);
+        setLoadError(
+          'No se pudo conectar con Firebase. Verifica las variables NEXT_PUBLIC_FIREBASE_* en Vercel y vuelve a desplegar.'
+        );
+        setLoading(false);
+      }
+    );
+
+    return () => {
+      window.clearTimeout(timeout);
+      unsub();
+    };
   }, []);
 
   // Apply category filter
@@ -60,6 +93,27 @@ export default function MuralBoard() {
         <div className="text-center space-y-3">
           <div className="w-8 h-8 border-[3px] border-pine-green border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-sm text-gray-500">Cargando el mural…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="flex-1 flex items-center justify-center px-6">
+        <div className="max-w-lg text-center space-y-3 rounded-xl border border-amber-200 bg-amber-50 px-6 py-8">
+          <p className="text-3xl">⚠️</p>
+          <p className="font-display font-semibold text-gray-800 text-lg">
+            No se pudo cargar el mural
+          </p>
+          <p className="text-sm text-gray-600 leading-relaxed">{loadError}</p>
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="mt-2 inline-flex items-center rounded-full bg-pine-green px-4 py-2 text-sm font-semibold text-white hover:brightness-110"
+          >
+            Reintentar
+          </button>
         </div>
       </div>
     );
