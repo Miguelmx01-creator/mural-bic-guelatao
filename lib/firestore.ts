@@ -9,6 +9,7 @@ import {
 } from 'firebase/firestore';
 import { db } from './firebase';
 import { normalizeComunidad } from './utils';
+import { parseImagenUrls, toFirestoreImages } from './tarjeta-images';
 
 export type Tarjeta = {
   id: string;
@@ -18,7 +19,7 @@ export type Tarjeta = {
   titulo: string;
   descripcion: string;
   autor: string;
-  imagenUrl: string | null;
+  imagenUrls: string[];
   creadoEn: Date | null;
 };
 
@@ -44,7 +45,7 @@ export function subscribeTarjetas(
           titulo:       d.titulo      ?? '',
           descripcion:  d.descripcion ?? '',
           autor:        d.autor       ?? '',
-          imagenUrl:    d.imagenUrl   ?? null,
+          imagenUrls:   parseImagenUrls(d),
           creadoEn:     d.creadoEn?.toDate() ?? null,
         };
       });
@@ -58,8 +59,10 @@ export function subscribeTarjetas(
 }
 
 export async function crearTarjeta(nueva: NuevaTarjeta): Promise<void> {
+  const images = toFirestoreImages(nueva.imagenUrls);
   await addDoc(collection(db, 'tarjetas'), {
     ...nueva,
+    ...images,
     comunidadKey: normalizeComunidad(nueva.comunidadRaw),
     creadoEn:     serverTimestamp(),
   });

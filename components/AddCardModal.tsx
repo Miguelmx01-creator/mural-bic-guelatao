@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { X, Loader2 } from 'lucide-react';
 import { CATEGORIES, getCategoryById } from '@/lib/categories';
 import { crearTarjeta } from '@/lib/firestore';
 import { normalizeComunidad } from '@/lib/utils';
 import { uploadToCloudinary } from '@/lib/cloudinary';
-import ImageUploadField from './ImageUploadField';
+import MultiImageUploadField, { type ImagePreviewItem } from './MultiImageUploadField';
 
 interface Props {
   existingCommunities: string[];
@@ -22,8 +22,7 @@ export default function AddCardModal({ existingCommunities, initialCategoria = '
   const [titulo, setTitulo]               = useState('');
   const [descripcion, setDescripcion]     = useState('');
   const [autor, setAutor]                 = useState('');
-  const [imageFile, setImageFile]         = useState<File | null>(null);
-  const [imagePreview, setImagePreview]   = useState<string | null>(null);
+  const [imageItems, setImageItems]       = useState<Array<ImagePreviewItem & { file: File }>>([]);
   const [suggestions, setSuggestions]     = useState<string[]>([]);
   const [showSug, setShowSug]             = useState(false);
   const [loading, setLoading]             = useState(false);
@@ -47,17 +46,24 @@ export default function AddCardModal({ existingCommunities, initialCategoria = '
     return () => document.removeEventListener('keydown', handler);
   }, [onClose]);
 
-  const handleImageSelect = useCallback((file: File) => {
-    setImageFile(file);
+  const handleAddFiles = useCallback((files: File[]) => {
     setError(null);
-    const reader = new FileReader();
-    reader.onloadend = () => setImagePreview(reader.result as string);
-    reader.readAsDataURL(file);
+    setImageItems((prev) => [
+      ...prev,
+      ...files.map((file) => ({
+        id: crypto.randomUUID(),
+        src: URL.createObjectURL(file),
+        file,
+      })),
+    ]);
   }, []);
 
-  const handleImageClear = useCallback(() => {
-    setImageFile(null);
-    setImagePreview(null);
+  const handleRemoveImage = useCallback((id: string) => {
+    setImageItems((prev) => {
+      const removed = prev.find((item) => item.id === id);
+      if (removed?.src.startsWith('blob:')) URL.revokeObjectURL(removed.src);
+      return prev.filter((item) => item.id !== id);
+    });
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -69,15 +75,16 @@ export default function AddCardModal({ existingCommunities, initialCategoria = '
     setLoading(true);
     setError(null);
     try {
-      let imagenUrl: string | null = null;
-      if (imageFile) imagenUrl = await uploadToCloudinary(imageFile);
+      const imagenUrls = imageItems.length
+        ? await Promise.all(imageItems.map((item) => uploadToCloudinary(item.file)))
+        : [];
       await crearTarjeta({
         comunidadRaw: comunidadRaw.trim(),
         categoria,
         titulo:       titulo.trim(),
         descripcion:  descripcion.trim(),
         autor:        autor.trim(),
-        imagenUrl,
+        imagenUrls,
       });
       onClose();
     } catch (err) {
@@ -157,10 +164,10 @@ export default function AddCardModal({ existingCommunities, initialCategoria = '
 
           {/* Imagen — justo después de categoría, con pista por apartado */}
           {categoria ? (
-            <ImageUploadField
-              preview={imagePreview}
-              onSelect={handleImageSelect}
-              onClear={handleImageClear}
+            <MultiImageUploadField
+              items={imageItems}
+              onAddFiles={handleAddFiles}
+              onRemove={handleRemoveImage}
               onError={setError}
               accentColor={selectedCat?.bg}
               hint={selectedCat?.imageHint}

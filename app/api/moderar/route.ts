@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminDb } from '@/lib/firebase-admin';
 import { CATEGORIES } from '@/lib/categories';
+import { toFirestoreImages } from '@/lib/tarjeta-images';
 
 const VALID_CATEGORY_IDS = new Set(CATEGORIES.map((c) => c.id));
 
@@ -44,7 +45,11 @@ export async function DELETE(req: NextRequest) {
 
 // ---------- PATCH — editar tarjeta ----------
 
-const EDITABLE = ['titulo', 'descripcion', 'autor', 'categoria', 'imagenUrl'] as const;
+const EDITABLE = ['titulo', 'descripcion', 'autor', 'categoria', 'imagenUrl', 'imagenUrls'] as const;
+
+function isHttpsUrl(value: unknown): value is string {
+  return typeof value === 'string' && value.startsWith('https://');
+}
 
 export async function PATCH(req: NextRequest) {
   try {
@@ -55,19 +60,28 @@ export async function PATCH(req: NextRequest) {
     if (!cardId)                                  return BAD('cardId requerido');
     if (!updates || typeof updates !== 'object')  return BAD('updates requerido');
 
-    const safe: Record<string, string | null> = {};
+    const safe: Record<string, string | string[] | null> = {};
     for (const field of EDITABLE) {
+      if (field === 'imagenUrls') {
+        if (Array.isArray(updates.imagenUrls)) {
+          const urls = updates.imagenUrls.filter(isHttpsUrl);
+          Object.assign(safe, toFirestoreImages(urls));
+        }
+        continue;
+      }
       if (field === 'imagenUrl') {
-        if (updates.imagenUrl === null) safe.imagenUrl = null;
-        else if (typeof updates.imagenUrl === 'string' && updates.imagenUrl.startsWith('https://')) {
-          safe.imagenUrl = updates.imagenUrl;
+        if (updates.imagenUrl === null) {
+          safe.imagenUrl = null;
+          safe.imagenUrls = [];
+        } else if (isHttpsUrl(updates.imagenUrl)) {
+          Object.assign(safe, toFirestoreImages([updates.imagenUrl]));
         }
         continue;
       }
       if (typeof updates[field] === 'string') safe[field] = updates[field];
     }
     if (Object.keys(safe).length === 0) return BAD('Sin campos válidos para actualizar');
-    if (safe.categoria && !VALID_CATEGORY_IDS.has(safe.categoria)) {
+    if (typeof safe.categoria === 'string' && !VALID_CATEGORY_IDS.has(safe.categoria)) {
       return BAD('Categoría no válida');
     }
 

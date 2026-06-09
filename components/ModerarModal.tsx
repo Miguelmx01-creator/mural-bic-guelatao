@@ -5,7 +5,9 @@ import { X, Trash2, Loader2, Pencil } from 'lucide-react';
 import { type Tarjeta } from '@/lib/firestore';
 import { CATEGORIES, getCategoryById } from '@/lib/categories';
 import { uploadToCloudinary } from '@/lib/cloudinary';
-import ImageUploadField from './ImageUploadField';
+import MultiImageUploadField, { type ImagePreviewItem } from './MultiImageUploadField';
+
+type ImageItem = ImagePreviewItem & { file?: File };
 
 interface Props {
   card: Tarjeta;
@@ -21,9 +23,9 @@ export default function ModerarModal({ card, onClose }: Props) {
   const [titulo, setTitulo]             = useState(card.titulo);
   const [descripcion, setDescripcion]   = useState(card.descripcion);
   const [autor, setAutor]               = useState(card.autor);
-  const [imagenUrl, setImagenUrl]       = useState<string | null>(card.imagenUrl);
-  const [imageFile, setImageFile]       = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(card.imagenUrl);
+  const [imageItems, setImageItems]     = useState<ImageItem[]>(() =>
+    card.imagenUrls.map((url) => ({ id: url, src: url }))
+  );
   const [loading, setLoading]           = useState(false);
   const [error, setError]               = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -36,18 +38,24 @@ export default function ModerarModal({ card, onClose }: Props) {
     return () => document.removeEventListener('keydown', handler);
   }, [onClose]);
 
-  const handleImageSelect = useCallback((file: File) => {
-    setImageFile(file);
+  const handleAddFiles = useCallback((files: File[]) => {
     setError(null);
-    const reader = new FileReader();
-    reader.onloadend = () => setImagePreview(reader.result as string);
-    reader.readAsDataURL(file);
+    setImageItems((prev) => [
+      ...prev,
+      ...files.map((file) => ({
+        id: crypto.randomUUID(),
+        src: URL.createObjectURL(file),
+        file,
+      })),
+    ]);
   }, []);
 
-  const handleImageClear = useCallback(() => {
-    setImageFile(null);
-    setImagePreview(null);
-    setImagenUrl(null);
+  const handleRemoveImage = useCallback((id: string) => {
+    setImageItems((prev) => {
+      const removed = prev.find((item) => item.id === id);
+      if (removed?.src.startsWith('blob:')) URL.revokeObjectURL(removed.src);
+      return prev.filter((item) => item.id !== id);
+    });
   }, []);
 
   const handleSave = async () => {
@@ -59,24 +67,22 @@ export default function ModerarModal({ card, onClose }: Props) {
     setLoading(true);
     setError(null);
     try {
-      let finalImageUrl = imagenUrl;
-      if (imageFile) {
-        finalImageUrl = await uploadToCloudinary(imageFile);
+      const imagenUrls: string[] = [];
+      for (const item of imageItems) {
+        if (item.file) {
+          imagenUrls.push(await uploadToCloudinary(item.file));
+        } else if (item.src.startsWith('https://')) {
+          imagenUrls.push(item.src);
+        }
       }
 
-      const updates: Record<string, string | null> = {
+      const updates: Record<string, string | string[] | null> = {
         categoria,
         titulo: titulo.trim(),
         descripcion: descripcion.trim(),
         autor: autor.trim(),
+        imagenUrls,
       };
-
-      const imageChanged =
-        imageFile !== null ||
-        card.imagenUrl !== finalImageUrl;
-      if (imageChanged) {
-        updates.imagenUrl = finalImageUrl;
-      }
 
       const res = await fetch('/api/moderar', {
         method: 'PATCH',
@@ -148,14 +154,14 @@ export default function ModerarModal({ card, onClose }: Props) {
             </select>
           </div>
 
-          <ImageUploadField
-            preview={imagePreview}
-            onSelect={handleImageSelect}
-            onClear={handleImageClear}
+          <MultiImageUploadField
+            items={imageItems}
+            onAddFiles={handleAddFiles}
+            onRemove={handleRemoveImage}
             onError={setError}
             accentColor={selectedCat?.bg}
             hint={selectedCat?.imageHint}
-            label="Imagen de la tarjeta"
+            label="Imágenes de la tarjeta"
           />
 
           <div>
