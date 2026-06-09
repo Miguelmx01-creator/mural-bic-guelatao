@@ -21,9 +21,7 @@ export default function MuralBoard() {
   // Real-time listener
   useEffect(() => {
     if (!isFirebaseConfigured()) {
-      setLoadError(
-        'Faltan las variables de Firebase en el servidor. En Vercel ve a Settings → Environment Variables, agrega las 11 variables del archivo .env.example (copiando los valores de tu .env.local) y luego haz Redeploy.'
-      );
+      setLoadError('No hay configuración de Firebase disponible.');
       setLoading(false);
       return;
     }
@@ -31,7 +29,7 @@ export default function MuralBoard() {
     const timeout = window.setTimeout(() => {
       setLoadError((prev) =>
         prev ??
-        'La conexión con Firebase tardó demasiado. Revisa las variables de entorno en Vercel y vuelve a desplegar el proyecto.'
+        'La conexión con Firebase tardó demasiado. Comprueba tu conexión a internet e intenta de nuevo.'
       );
       setLoading(false);
     }, 15000);
@@ -45,9 +43,7 @@ export default function MuralBoard() {
       },
       () => {
         window.clearTimeout(timeout);
-        setLoadError(
-          'No se pudo conectar con Firebase. Verifica las variables NEXT_PUBLIC_FIREBASE_* en Vercel y vuelve a desplegar.'
-        );
+        setLoadError('No se pudo conectar con Firebase. Intenta recargar la página.');
         setLoading(false);
       }
     );

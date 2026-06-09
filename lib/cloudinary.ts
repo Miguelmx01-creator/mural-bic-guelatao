@@ -1,11 +1,13 @@
+import { cloudinaryPublicConfig } from './public-config';
+
 /**
  * Unsigned upload to Cloudinary.
  * Uses an unsigned preset configured in the Cloudinary dashboard.
  * Safe to call from the browser — no API secret is needed.
  */
 export async function uploadToCloudinary(file: File): Promise<string> {
-  const cloudName    = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+  const cloudName    = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME    ?? cloudinaryPublicConfig.cloudName;
+  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET ?? cloudinaryPublicConfig.uploadPreset;
 
   if (!cloudName || !uploadPreset) {
     throw new Error('Cloudinary no está configurado: revisa las variables de entorno.');
