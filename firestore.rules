@@ -1,0 +1,17 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /tarjetas/{docId} {
+      // Cualquiera puede leer y crear tarjetas (sin login)
+      allow read:   if true;
+      allow create: if true;
+
+      // Borrar y editar SOLO via Admin SDK (API route /api/moderar)
+      // El Admin SDK bypasa estas reglas, los clientes no pueden
+      allow update, delete: if false;
+    }
+
+  }
+}
