@@ -2,6 +2,7 @@
 
 import { type Tarjeta } from '@/lib/firestore';
 import CardItem from './CardItem';
+import CommunityComments from './CommunityComments';
 
 interface Props {
   comunidadKey: string;
@@ -23,11 +24,13 @@ export default function CommunityColumn({ comunidadKey, tarjetas, onModerate }: 
       </div>
 
       {/* Cards */}
-      <div className="flex flex-col gap-3 pb-6">
+      <div className="flex flex-col gap-3 pb-2">
         {tarjetas.map((card) => (
           <CardItem key={card.id} card={card} onModerate={onModerate} />
         ))}
       </div>
+
+      <CommunityComments comunidadKey={comunidadKey} />
     </div>
   );
 }

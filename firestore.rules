@@ -13,5 +13,24 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    match /comentarios/{docId} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasAll([
+          'comunidadKey', 'autor', 'texto', 'editToken', 'creadoEn', 'editadoEn'
+        ])
+        && request.resource.data.autor is string
+        && request.resource.data.autor.size() > 0
+        && request.resource.data.autor.size() <= 80
+        && request.resource.data.texto is string
+        && request.resource.data.texto.size() > 0
+        && request.resource.data.texto.size() <= 500
+        && request.resource.data.comunidadKey is string
+        && request.resource.data.comunidadKey.size() > 0
+        && request.resource.data.editToken is string
+        && request.resource.data.editToken.size() >= 20;
+      // Editar/borrar solo via Admin SDK (/api/comentarios)
+      allow update, delete: if false;
+    }
+
   }
 }
