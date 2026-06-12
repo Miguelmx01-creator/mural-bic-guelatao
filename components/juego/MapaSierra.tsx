@@ -72,9 +72,10 @@ export default function MapaSierra({ jugador, onVerRanking, onJugarNivel }: Prop
 
           <div className="relative flex flex-col gap-8">
             {NIVELES.map((lvl, i) => {
-              const completado = jugador.nivelActual > lvl.nivel;
-              const jugable    = jugador.nivelActual === lvl.nivel && lvl.nivel <= 5;
               const bloqueado  = jugador.nivelActual < lvl.nivel;
+              const esCurrent  = jugador.nivelActual === lvl.nivel && lvl.nivel <= 5;
+              const completado = jugador.nivelActual > lvl.nivel;
+              const jugable    = !bloqueado && lvl.nivel <= 5;
               const isRight    = i % 2 === 1;
 
               return (
@@ -104,7 +105,7 @@ export default function MapaSierra({ jugador, onVerRanking, onJugarNivel }: Prop
                           }
                     }
                   >
-                    {completado ? '✅' : jugable ? lvl.emoji : '🔒'}
+                    {completado ? '✅' : esCurrent ? lvl.emoji : '🔒'}
                   </div>
 
                   {/* Etiqueta */}
@@ -113,7 +114,7 @@ export default function MapaSierra({ jugador, onVerRanking, onJugarNivel }: Prop
                       className="text-[10px] font-bold uppercase tracking-[0.12em] mb-0.5"
                       style={{
                         color: completado ? 'rgba(47,184,154,0.6)' :
-                               jugable    ? lvl.color :
+                               esCurrent  ? lvl.color :
                                             'rgba(255,255,255,0.2)',
                       }}
                     >
@@ -122,19 +123,22 @@ export default function MapaSierra({ jugador, onVerRanking, onJugarNivel }: Prop
                     <p
                       className="text-sm font-semibold leading-tight"
                       style={{
-                        color: completado ? 'rgba(255,255,255,0.5)' :
-                               jugable    ? 'rgba(255,255,255,0.9)' :
-                                            'rgba(255,255,255,0.2)',
+                        color: bloqueado ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.85)',
                       }}
                     >
                       {lvl.nombre}
                     </p>
 
                     {completado && (
-                      <p className="text-[10px] mt-0.5 text-[#2FB89A]/60">Completado ✓</p>
+                      <span
+                        className="inline-block mt-1.5 font-game text-[#0D0D1A] text-[11px] px-3 py-0.5 rounded-full"
+                        style={{ background: 'rgba(47,184,154,0.7)' }}
+                      >
+                        REJUGAR ↺
+                      </span>
                     )}
 
-                    {jugable && (
+                    {esCurrent && (
                       <span
                         className="inline-block mt-1.5 font-game text-[#0D0D1A] text-[11px] px-3 py-0.5 rounded-full animate-pulse"
                         style={{ background: lvl.color }}
@@ -163,7 +167,9 @@ export default function MapaSierra({ jugador, onVerRanking, onJugarNivel }: Prop
             <p className="font-game text-[#F2C14E] text-xl" style={{ textShadow: '0 0 16px rgba(242,193,78,0.4)' }}>
               🏆 SIERRA CONQUISTADA
             </p>
-            <p className="text-white/40 text-xs mt-2">Has completado todos los niveles</p>
+            <p className="text-white/40 text-xs mt-2">
+              Toca cualquier nivel para volver a jugar y mejorar tu puntaje
+            </p>
           </div>
         ) : (
           <p className="text-center text-white/20 text-xs mt-12 pb-6">

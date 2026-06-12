@@ -32,7 +32,7 @@ export default function JuegoSierra() {
     const optimista: Jugador = {
       ...jugador,
       puntaje:     jugador.puntaje + puntosGanados,
-      nivelActual: Math.min(jugador.nivelActual + 1, 6),
+      nivelActual: Math.min(Math.max(jugador.nivelActual, nivelActivo + 1), 6),
     };
     setJugador(optimista);
     setNivelActivo(null);
