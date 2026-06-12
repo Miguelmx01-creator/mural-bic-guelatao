@@ -65,6 +65,20 @@ export async function buscarOCrearJugador(
   };
 }
 
+export async function actualizarProgreso(
+  jugadorId:       string,
+  nivelCompletado: number,
+  puntosGanados:   number
+): Promise<Pick<Jugador, 'puntaje' | 'nivelActual'>> {
+  const res = await fetch('/api/progreso', {
+    method:  'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ jugadorId, nivelCompletado, puntosGanados }),
+  });
+  if (!res.ok) throw new Error('Error al actualizar progreso');
+  return res.json();
+}
+
 export function subscribeRanking(
   callback: (jugadores: Jugador[]) => void
 ): Unsubscribe {

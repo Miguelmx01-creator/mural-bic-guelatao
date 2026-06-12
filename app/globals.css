@@ -13,6 +13,22 @@
   }
 }
 
+/* ---- Animaciones de juego ---- */
+@keyframes game-shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-7px); }
+  40%       { transform: translateX(7px); }
+  60%       { transform: translateX(-4px); }
+  80%       { transform: translateX(4px); }
+}
+@keyframes game-correct-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+.game-shake   { animation: game-shake       0.38s ease-out; }
+.game-correct { animation: game-correct-pop 0.28s ease-out; }
+
 /* ---- Base ---- */
 @layer base {
   html {

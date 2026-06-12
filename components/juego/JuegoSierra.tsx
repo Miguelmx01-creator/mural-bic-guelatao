@@ -2,22 +2,64 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import LoginJugador from './LoginJugador';
-import MapaSierra from './MapaSierra';
+import LoginJugador  from './LoginJugador';
+import MapaSierra    from './MapaSierra';
 import RankingSierra from './RankingSierra';
-import { type Jugador } from '@/lib/jugadores';
+import NivelJuego    from './NivelJuego';
+import { type Jugador, actualizarProgreso } from '@/lib/jugadores';
 
-type Vista = 'login' | 'mapa' | 'ranking';
+type Vista = 'login' | 'mapa' | 'ranking' | 'nivel';
 
 export default function JuegoSierra() {
-  const [vista, setVista]     = useState<Vista>('login');
-  const [jugador, setJugador] = useState<Jugador | null>(null);
+  const [vista, setVista]           = useState<Vista>('login');
+  const [jugador, setJugador]       = useState<Jugador | null>(null);
+  const [nivelActivo, setNivelActivo] = useState<number | null>(null);
 
   function handleLogin(j: Jugador) {
     setJugador(j);
     setVista('mapa');
   }
 
+  function handleJugarNivel(nivel: number) {
+    setNivelActivo(nivel);
+    setVista('nivel');
+  }
+
+  async function handleNivelCompletado(puntosGanados: number) {
+    if (!jugador || nivelActivo === null) return;
+
+    // Actualización optimista inmediata
+    const optimista: Jugador = {
+      ...jugador,
+      puntaje:     jugador.puntaje + puntosGanados,
+      nivelActual: Math.min(jugador.nivelActual + 1, 6),
+    };
+    setJugador(optimista);
+    setNivelActivo(null);
+    setVista('mapa');
+
+    // Sincronizar con Firestore en segundo plano
+    try {
+      const updated = await actualizarProgreso(jugador.id, nivelActivo, puntosGanados);
+      setJugador(j => j ? { ...j, puntaje: updated.puntaje, nivelActual: updated.nivelActual } : j);
+    } catch (e) {
+      console.error('Error al sincronizar progreso:', e);
+    }
+  }
+
+  // ── Vista: nivel ──────────────────────────────────────────────────────────
+  if (vista === 'nivel' && nivelActivo !== null && jugador) {
+    return (
+      <NivelJuego
+        jugador={jugador}
+        nivel={nivelActivo}
+        onCompletado={handleNivelCompletado}
+        onSalir={() => { setNivelActivo(null); setVista('mapa'); }}
+      />
+    );
+  }
+
+  // ── Vista: login ──────────────────────────────────────────────────────────
   if (vista === 'login') {
     return (
       <div className="relative">
@@ -34,6 +76,7 @@ export default function JuegoSierra() {
 
   if (!jugador) return null;
 
+  // ── Vista: ranking ────────────────────────────────────────────────────────
   if (vista === 'ranking') {
     return (
       <RankingSierra
@@ -43,10 +86,12 @@ export default function JuegoSierra() {
     );
   }
 
+  // ── Vista: mapa ───────────────────────────────────────────────────────────
   return (
     <MapaSierra
       jugador={jugador}
       onVerRanking={() => setVista('ranking')}
+      onJugarNivel={handleJugarNivel}
     />
   );
 }

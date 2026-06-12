@@ -3,19 +3,22 @@
 import { type Jugador } from '@/lib/jugadores';
 
 const NIVELES = [
-  { nivel: 1, nombre: 'Capulalpam de Méndez',       emoji: '🏔️', color: '#F2C14E' },
-  { nivel: 2, nombre: 'Chicomezuchil',               emoji: '🌿', color: '#2FB89A' },
-  { nivel: 3, nombre: 'El Huamuchil',                emoji: '🌽', color: '#E5532E' },
-  { nivel: 4, nombre: 'Guelatao de Juárez',          emoji: '⭐', color: '#F2C14E' },
-  { nivel: 5, nombre: 'San Cristóbal Lachirioag',    emoji: '🎶', color: '#2FB89A' },
+  { nivel: 1, nombre: 'Capulalpam de Méndez',    emoji: '🏔️', color: '#F2C14E' },
+  { nivel: 2, nombre: 'Chicomezuchil',            emoji: '🌿', color: '#2FB89A' },
+  { nivel: 3, nombre: 'El Huamuchil',             emoji: '🌽', color: '#E5532E' },
+  { nivel: 4, nombre: 'Guelatao de Juárez',       emoji: '⭐', color: '#F2C14E' },
+  { nivel: 5, nombre: 'San Cristóbal Lachirioag', emoji: '🎶', color: '#2FB89A' },
 ];
 
 interface Props {
-  jugador: Jugador;
-  onVerRanking: () => void;
+  jugador:       Jugador;
+  onVerRanking:  () => void;
+  onJugarNivel:  (nivel: number) => void;
 }
 
-export default function MapaSierra({ jugador, onVerRanking }: Props) {
+export default function MapaSierra({ jugador, onVerRanking, onJugarNivel }: Props) {
+  const todosCompletados = jugador.nivelActual > 5;
+
   return (
     <div
       className="min-h-screen flex flex-col"
@@ -69,23 +72,31 @@ export default function MapaSierra({ jugador, onVerRanking }: Props) {
 
           <div className="relative flex flex-col gap-8">
             {NIVELES.map((lvl, i) => {
-              const unlocked = jugador.nivelActual >= lvl.nivel;
-              const isRight  = i % 2 === 1;
+              const completado = jugador.nivelActual > lvl.nivel;
+              const jugable    = jugador.nivelActual === lvl.nivel && lvl.nivel <= 5;
+              const bloqueado  = jugador.nivelActual < lvl.nivel;
+              const isRight    = i % 2 === 1;
 
               return (
                 <div
                   key={lvl.nivel}
-                  className={`flex items-center gap-5 ${isRight ? 'flex-row-reverse' : ''}`}
+                  className={`flex items-center gap-5 ${isRight ? 'flex-row-reverse' : ''} ${jugable ? 'cursor-pointer' : ''}`}
+                  onClick={jugable ? () => onJugarNivel(lvl.nivel) : undefined}
                 >
                   {/* Nodo */}
                   <div
                     className="relative z-10 flex-shrink-0 w-[60px] h-[60px] rounded-full flex items-center justify-center text-2xl select-none"
                     style={
-                      unlocked
+                      completado
+                        ? {
+                            background: `rgba(47,184,154,0.1)`,
+                            border:     '2px solid rgba(47,184,154,0.4)',
+                          }
+                        : jugable
                         ? {
                             background: `radial-gradient(circle at 35% 35%, ${lvl.color}22, ${lvl.color}08)`,
                             border:     `2px solid ${lvl.color}`,
-                            boxShadow:  `0 0 18px ${lvl.color}44, inset 0 0 8px ${lvl.color}11`,
+                            boxShadow:  `0 0 22px ${lvl.color}55, inset 0 0 10px ${lvl.color}11`,
                           }
                         : {
                             background: 'rgba(255,255,255,0.02)',
@@ -93,31 +104,48 @@ export default function MapaSierra({ jugador, onVerRanking }: Props) {
                           }
                     }
                   >
-                    {unlocked ? lvl.emoji : '🔒'}
+                    {completado ? '✅' : jugable ? lvl.emoji : '🔒'}
                   </div>
 
                   {/* Etiqueta */}
                   <div className={`flex-1 min-w-0 ${isRight ? 'text-right' : ''}`}>
                     <p
                       className="text-[10px] font-bold uppercase tracking-[0.12em] mb-0.5"
-                      style={{ color: unlocked ? lvl.color : 'rgba(255,255,255,0.2)' }}
+                      style={{
+                        color: completado ? 'rgba(47,184,154,0.6)' :
+                               jugable    ? lvl.color :
+                                            'rgba(255,255,255,0.2)',
+                      }}
                     >
                       Nivel {lvl.nivel}
                     </p>
                     <p
                       className="text-sm font-semibold leading-tight"
-                      style={{ color: unlocked ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.2)' }}
+                      style={{
+                        color: completado ? 'rgba(255,255,255,0.5)' :
+                               jugable    ? 'rgba(255,255,255,0.9)' :
+                                            'rgba(255,255,255,0.2)',
+                      }}
                     >
                       {lvl.nombre}
                     </p>
-                    {!unlocked && (
+
+                    {completado && (
+                      <p className="text-[10px] mt-0.5 text-[#2FB89A]/60">Completado ✓</p>
+                    )}
+
+                    {jugable && (
+                      <span
+                        className="inline-block mt-1.5 font-game text-[#0D0D1A] text-[11px] px-3 py-0.5 rounded-full animate-pulse"
+                        style={{ background: lvl.color }}
+                      >
+                        JUGAR ▶
+                      </span>
+                    )}
+
+                    {bloqueado && (
                       <p className="text-[10px] mt-0.5" style={{ color: 'rgba(255,255,255,0.18)' }}>
                         Completa el nivel anterior
-                      </p>
-                    )}
-                    {unlocked && lvl.nivel === jugador.nivelActual && (
-                      <p className="text-[10px] mt-0.5" style={{ color: lvl.color }}>
-                        ← Aquí estás
                       </p>
                     )}
                   </div>
@@ -127,9 +155,21 @@ export default function MapaSierra({ jugador, onVerRanking }: Props) {
           </div>
         </div>
 
-        <p className="text-center text-white/20 text-xs mt-12 pb-6">
-          Las preguntas llegan pronto 🎮
-        </p>
+        {todosCompletados ? (
+          <div
+            className="mt-10 mx-auto max-w-xs text-center rounded-2xl py-5 px-4"
+            style={{ background: 'rgba(242,193,78,0.07)', border: '1px solid rgba(242,193,78,0.25)' }}
+          >
+            <p className="font-game text-[#F2C14E] text-xl" style={{ textShadow: '0 0 16px rgba(242,193,78,0.4)' }}>
+              🏆 SIERRA CONQUISTADA
+            </p>
+            <p className="text-white/40 text-xs mt-2">Has completado todos los niveles</p>
+          </div>
+        ) : (
+          <p className="text-center text-white/20 text-xs mt-12 pb-6">
+            Toca JUGAR ▶ para comenzar tu nivel
+          </p>
+        )}
       </div>
     </div>
   );
