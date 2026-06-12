@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Libre_Baskerville, Inter } from 'next/font/google';
+import { Libre_Baskerville, Inter, Anton } from 'next/font/google';
 import './globals.css';
 
 const libreBaskerville = Libre_Baskerville({
@@ -12,6 +12,13 @@ const libreBaskerville = Libre_Baskerville({
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-body',
+  display: 'swap',
+});
+
+const anton = Anton({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-game',
   display: 'swap',
 });
 
@@ -30,7 +37,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className={`${libreBaskerville.variable} ${inter.variable}`}>
+    <html lang="es" className={`${libreBaskerville.variable} ${inter.variable} ${anton.variable}`}>
       <body>{children}</body>
     </html>
   );

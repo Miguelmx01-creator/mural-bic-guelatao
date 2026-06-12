@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { Mountain } from 'lucide-react';
 import MuralBoard from '@/components/MuralBoard';
 
@@ -17,6 +18,24 @@ export default function HomePage() {
           </p>
         </div>
       </header>
+
+      {/* ── Game banner ── */}
+      <Link
+        href="/juego"
+        className="flex-shrink-0 flex items-center justify-center gap-2 py-2.5 px-4 active:opacity-80 transition-opacity"
+        style={{
+          background: 'linear-gradient(90deg, #0D0D1A 0%, #1a0a2e 50%, #0D0D1A 100%)',
+          borderBottom: '1px solid rgba(242,193,78,0.2)',
+        }}
+      >
+        <span
+          className="font-game text-[#F2C14E] text-base tracking-widest"
+          style={{ textShadow: '0 0 12px rgba(242,193,78,0.6)' }}
+        >
+          🎮 La Sierra en Juego
+        </span>
+        <span className="text-[#F2C14E]/50 text-sm">→</span>
+      </Link>
 
       {/* ── Main board ── */}
       <main className="flex flex-col flex-1 overflow-hidden">
