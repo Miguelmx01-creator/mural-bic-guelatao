@@ -5,6 +5,7 @@
 
 import { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import JaguarGuide3D from '../characters/JaguarGuide3D';
 import { useGame } from '../engine/GameContext';
@@ -116,19 +117,42 @@ function Luciernagas({ count = 40 }: { count?: number }) {
 export default function IntroScene() {
   const { state, dispatch } = useGame();
   const isTalking = state.isDialogOpen;
+  const dialogEverOpened = useRef(false);
 
-  // Al montar la escena, abrir diálogo introductorio automáticamente
+  // Abrir diálogo introductorio al montar
   useEffect(() => {
     const timer = setTimeout(() => {
       dispatch({ type: 'OPEN_DIALOG', dialog: DIALOG_INTRO });
-    }, 1200); // pequeño delay para que el usuario vea la escena antes del diálogo
+    }, 1200);
     return () => clearTimeout(timer);
   }, []); // eslint-disable-line
+
+  // Transición al mapa cuando el diálogo de intro termina
+  useEffect(() => {
+    if (state.isDialogOpen) {
+      dialogEverOpened.current = true;
+      return;
+    }
+    if (!dialogEverOpened.current || state.scene !== 'intro') return;
+    const timer = setTimeout(() => {
+      dispatch({ type: 'SET_SCENE', scene: 'world-map' });
+    }, 600); // pausa dramática antes de abrir el mapa
+    return () => clearTimeout(timer);
+  }, [state.isDialogOpen, state.scene, dispatch]);
 
   const jugadorName = state.jugador?.nombreCompleto ?? '';
 
   return (
     <>
+      {/* Controles orbitales para la escena de intro (sin zoom, giro limitado) */}
+      <OrbitControls
+        enablePan={false}
+        enableZoom={false}
+        minPolarAngle={Math.PI / 6}
+        maxPolarAngle={Math.PI / 2.2}
+        target={[0, 0, 0]}
+      />
+
       {/* ── Iluminación ─────────────────────────────────────────────────── */}
       <ambientLight intensity={0.35} color="#3A2060" />
       <directionalLight

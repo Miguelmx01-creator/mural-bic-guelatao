@@ -1,12 +1,13 @@
 'use client';
 
 // HUD educativo: overlay 2D sobre el Canvas 3D.
-// Muestra puntaje, nivel, jugador, y botones de misiones/ranking/salir.
+// Fase 4: añade botón de inventario y toast de logros.
 
 import { motion } from 'framer-motion';
 import { useGame } from '../engine/GameContext';
+import AchievementToast from './AchievementToast';
 
-// Barra de XP visual
+// ─── Barra de progreso XP ─────────────────────────────────────────────────────
 function XPBar({ nivelActual }: { nivelActual: number }) {
   const porcentaje = Math.min(((nivelActual - 1) / 5) * 100, 100);
   return (
@@ -32,25 +33,29 @@ function XPBar({ nivelActual }: { nivelActual: number }) {
 
 export default function HUD() {
   const { state, dispatch } = useGame();
-  const { jugador, missions, scene } = state;
+  const { jugador, missions, scene, inventory } = state;
 
-  // Contar misiones activas
   const activeMissionCount = missions.filter(
     (m) => m.status === 'active' || m.status === 'available'
   ).length;
+
+  const collectedCount = inventory.length;
 
   if (!jugador || scene === 'login') return null;
 
   return (
     <>
-      {/* ── Panel superior izquierdo: jugador + puntaje ─────────────────── */}
+      {/* ── Toast de logro (encima de todo lo demás del HUD) ────────────── */}
+      <AchievementToast />
+
+      {/* ── Panel superior izquierdo: jugador ───────────────────────────── */}
       <motion.div
         className="absolute top-3 left-3 z-20 rounded-xl px-3 py-2 pointer-events-none"
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.3, duration: 0.5 }}
         style={{
-          background: 'rgba(8, 6, 18, 0.8)',
+          background: 'rgba(8, 6, 18, 0.82)',
           border: '1px solid rgba(242,193,78,0.18)',
           backdropFilter: 'blur(4px)',
           minWidth: 160,
@@ -75,7 +80,7 @@ export default function HUD() {
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.4, duration: 0.5 }}
         style={{
-          background: 'rgba(8, 6, 18, 0.8)',
+          background: 'rgba(8, 6, 18, 0.82)',
           border: '1px solid rgba(242,193,78,0.18)',
           backdropFilter: 'blur(4px)',
         }}
@@ -84,7 +89,7 @@ export default function HUD() {
         <motion.p
           className="font-game text-[#F2C14E] text-3xl leading-none"
           key={jugador.puntaje}
-          initial={{ scale: 1.2 }}
+          initial={{ scale: 1.25 }}
           animate={{ scale: 1 }}
           style={{ textShadow: '0 0 14px rgba(242,193,78,0.5)' }}
         >
@@ -94,64 +99,83 @@ export default function HUD() {
 
       {/* ── Barra inferior de acciones ───────────────────────────────────── */}
       <motion.div
-        className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3"
+        className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6, duration: 0.5 }}
       >
-        {/* Botón Misiones */}
+        {/* Inventario / Colección */}
         <button
-          onClick={() => dispatch({ type: 'TOGGLE_MISSIONS' })}
-          className="relative rounded-2xl px-4 py-2.5 flex items-center gap-2 active:scale-95 transition-transform"
+          onClick={() => dispatch({ type: 'TOGGLE_INVENTORY' })}
+          className="relative rounded-2xl px-3 py-2.5 flex items-center gap-1.5 active:scale-95 transition-transform"
           style={{
             background: 'rgba(8, 6, 18, 0.88)',
-            border: '1px solid rgba(47,184,154,0.35)',
+            border: '1px solid rgba(242,193,78,0.22)',
           }}
         >
-          <span className="text-lg">📋</span>
+          <span className="text-base">🎒</span>
+          <span className="font-game text-[#F2C14E] text-xs tracking-wide">COLECCIÓN</span>
+          {collectedCount > 0 && (
+            <span
+              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-[#0D0D1A]"
+              style={{ background: '#F2C14E' }}
+            >
+              {collectedCount}
+            </span>
+          )}
+        </button>
+
+        {/* Misiones */}
+        <button
+          onClick={() => dispatch({ type: 'TOGGLE_MISSIONS' })}
+          className="relative rounded-2xl px-3 py-2.5 flex items-center gap-1.5 active:scale-95 transition-transform"
+          style={{
+            background: 'rgba(8, 6, 18, 0.88)',
+            border: '1px solid rgba(47,184,154,0.32)',
+          }}
+        >
+          <span className="text-base">📋</span>
           <span className="font-game text-[#2FB89A] text-xs tracking-wide">MISIONES</span>
           {activeMissionCount > 0 && (
             <span
               className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-[#0D0D1A]"
-              style={{ background: '#F2C14E' }}
+              style={{ background: '#2FB89A' }}
             >
               {activeMissionCount}
             </span>
           )}
         </button>
 
-        {/* Botón Ranking */}
+        {/* Ranking */}
         <button
           onClick={() => dispatch({ type: 'SET_SCENE', scene: 'ranking' })}
-          className="rounded-2xl px-4 py-2.5 flex items-center gap-2 active:scale-95 transition-transform"
+          className="rounded-2xl px-3 py-2.5 flex items-center gap-1.5 active:scale-95 transition-transform"
           style={{
             background: 'rgba(8, 6, 18, 0.88)',
-            border: '1px solid rgba(242,193,78,0.25)',
+            border: '1px solid rgba(242,193,78,0.22)',
           }}
         >
-          <span className="text-lg">🏆</span>
+          <span className="text-base">🏆</span>
           <span className="font-game text-[#F2C14E] text-xs tracking-wide">RANKING</span>
         </button>
 
-        {/* Botón Mapa (Fase 2) */}
+        {/* Mapa */}
         <button
           onClick={() => dispatch({ type: 'SET_SCENE', scene: 'world-map' })}
-          className="rounded-2xl px-4 py-2.5 flex items-center gap-2 active:scale-95 transition-transform"
+          className="rounded-2xl px-3 py-2.5 flex items-center gap-1.5 active:scale-95 transition-transform"
           style={{
             background: 'rgba(8, 6, 18, 0.88)',
-            border: '1px solid rgba(255,255,255,0.12)',
+            border: '1px solid rgba(255,255,255,0.1)',
           }}
         >
-          <span className="text-lg">🗺️</span>
-          <span className="font-game text-white/50 text-xs tracking-wide">MAPA</span>
+          <span className="text-base">🗺️</span>
+          <span className="font-game text-white/45 text-xs tracking-wide">MAPA</span>
         </button>
       </motion.div>
 
-      {/* ── Botón Salir (esquina superior) ──────────────────────────────── */}
+      {/* ── Botón Salir ──────────────────────────────────────────────────── */}
       <button
-        onClick={() => {
-          if (typeof window !== 'undefined') window.location.href = '/';
-        }}
+        onClick={() => { if (typeof window !== 'undefined') window.location.href = '/'; }}
         className="absolute top-3 left-1/2 -translate-x-1/2 z-20 text-white/25 hover:text-white/60 text-xs transition-colors px-3 py-1 rounded-full"
         style={{ background: 'rgba(0,0,0,0.3)' }}
       >

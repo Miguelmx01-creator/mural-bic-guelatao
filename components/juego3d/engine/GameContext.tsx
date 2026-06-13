@@ -6,25 +6,32 @@ import {
   type GameScene,
   type DialogTree,
   type Mission,
+  type InventoryItem,
+  type Achievement,
   INITIAL_GAME_STATE,
 } from '@/lib/game-state';
 import { initMissionsForPlayer } from '@/lib/missions';
+import { initAchievementsForPlayer } from '@/lib/achievements';
 import { DIALOG_INTRO } from '@/lib/dialogs';
 import type { Jugador } from '@/lib/jugadores';
 
 // ─── Acciones ─────────────────────────────────────────────────────────────────
 
 type GameAction =
-  | { type: 'LOGIN';              jugador: Jugador }
-  | { type: 'SET_SCENE';          scene: GameScene }
-  | { type: 'OPEN_DIALOG';        dialog: DialogTree }
-  | { type: 'ADVANCE_DIALOG';     nextId: string | null }
+  | { type: 'LOGIN';               jugador: Jugador }
+  | { type: 'SET_SCENE';           scene: GameScene }
+  | { type: 'OPEN_DIALOG';         dialog: DialogTree }
+  | { type: 'ADVANCE_DIALOG';      nextId: string | null }
   | { type: 'CLOSE_DIALOG' }
   | { type: 'TOGGLE_MISSIONS' }
-  | { type: 'COMPLETE_OBJECTIVE'; missionId: string; objectiveId: string }
-  | { type: 'ACTIVATE_MISSION';   missionId: string }
-  | { type: 'UPDATE_JUGADOR';     partial: Partial<Jugador> }
-  | { type: 'SET_COMMUNITY';      nivel: number | null };
+  | { type: 'COMPLETE_OBJECTIVE';  missionId: string; objectiveId: string }
+  | { type: 'ACTIVATE_MISSION';    missionId: string }
+  | { type: 'UPDATE_JUGADOR';      partial: Partial<Jugador> }
+  | { type: 'SET_COMMUNITY';       nivel: number | null }
+  | { type: 'UNLOCK_ACHIEVEMENT';  id: string }
+  | { type: 'COLLECT_ITEM';        item: InventoryItem }
+  | { type: 'TOGGLE_INVENTORY' }
+  | { type: 'CLEAR_TOAST' };
 
 // ─── Reducer ──────────────────────────────────────────────────────────────────
 
@@ -32,13 +39,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
 
     case 'LOGIN': {
-      const missions = initMissionsForPlayer(action.jugador.nivelActual);
-      return {
-        ...state,
-        jugador: action.jugador,
-        missions,
-        scene: 'intro',
-      };
+      const missions     = initMissionsForPlayer(action.jugador.nivelActual);
+      const achievements = initAchievementsForPlayer(action.jugador);
+      return { ...state, jugador: action.jugador, missions, achievements, scene: 'intro' };
     }
 
     case 'SET_SCENE':
@@ -47,17 +50,16 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     case 'OPEN_DIALOG':
       return {
         ...state,
-        activeDialog: action.dialog,
-        activeNodeId: action.dialog.startId,
-        isDialogOpen: true,
+        activeDialog:  action.dialog,
+        activeNodeId:  action.dialog.startId,
+        isDialogOpen:  true,
       };
 
-    case 'ADVANCE_DIALOG': {
+    case 'ADVANCE_DIALOG':
       if (action.nextId === null) {
         return { ...state, activeDialog: null, activeNodeId: null, isDialogOpen: false };
       }
       return { ...state, activeNodeId: action.nextId };
-    }
 
     case 'CLOSE_DIALOG':
       return { ...state, activeDialog: null, activeNodeId: null, isDialogOpen: false };
@@ -81,15 +83,10 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           o.id === action.objectiveId ? { ...o, completed: true } : o
         );
         const allDone = objectives.every((o) => o.completed);
-        return {
-          ...m,
-          objectives,
-          status: allDone ? 'completed' : m.status,
-        };
+        return { ...m, objectives, status: allDone ? 'completed' : m.status };
       });
-      // Desbloquear siguiente misión si hay prerequisito
       const completedId = action.missionId;
-      const unlocked = state.missions.find((m) => m.prerequisite === completedId);
+      const unlocked    = state.missions.find((m) => m.prerequisite === completedId);
       const finalMissions = unlocked
         ? missions.map((m) =>
             m.id === unlocked.id ? { ...m, status: 'available' as const } : m
@@ -105,6 +102,38 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     case 'SET_COMMUNITY':
       return { ...state, activeCommunityLevel: action.nivel };
 
+    // ── Fase 4 ────────────────────────────────────────────────────────────────
+
+    case 'UNLOCK_ACHIEVEMENT': {
+      const achievement = state.achievements.find((a) => a.id === action.id);
+      if (!achievement || achievement.unlockedAt !== null) return state;
+      const now          = new Date();
+      const achievements = state.achievements.map((a) =>
+        a.id === action.id ? { ...a, unlockedAt: now } : a
+      );
+      // El último logro desbloqueado en un batch se muestra como toast
+      return { ...state, achievements, toastAchievement: { ...achievement, unlockedAt: now } };
+    }
+
+    case 'COLLECT_ITEM': {
+      const existing = state.inventory.find((i) => i.id === action.item.id);
+      if (existing) {
+        return {
+          ...state,
+          inventory: state.inventory.map((i) =>
+            i.id === action.item.id ? { ...i, quantity: i.quantity + 1 } : i
+          ),
+        };
+      }
+      return { ...state, inventory: [...state.inventory, { ...action.item, quantity: 1 }] };
+    }
+
+    case 'TOGGLE_INVENTORY':
+      return { ...state, isInventoryOpen: !state.isInventoryOpen };
+
+    case 'CLEAR_TOAST':
+      return { ...state, toastAchievement: null };
+
     default:
       return state;
   }
@@ -115,7 +144,6 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 type GameContextValue = {
   state: GameState;
   dispatch: React.Dispatch<GameAction>;
-  // Helpers de alto nivel
   startIntroDialog: () => void;
   advanceDialog: (nextId: string | null) => void;
 };

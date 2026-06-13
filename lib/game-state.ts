@@ -81,27 +81,26 @@ export type DialogTree = {
 // ─── Estado Global del Juego ──────────────────────────────────────────────────
 
 export type GameState = {
-  // Escena activa
   scene: GameScene;
-
-  // Jugador (sincronizado con Firebase)
   jugador: Jugador | null;
 
   // Misiones
   missions: Mission[];
   isMissionPanelOpen: boolean;
 
-  // Inventario y logros (Fase 4)
+  // Inventario cultural y logros
   inventory: InventoryItem[];
   achievements: Achievement[];
+  isInventoryOpen: boolean;
+  toastAchievement: Achievement | null; // logro que se muestra como notificación
 
   // Sistema de diálogos
   activeDialog: DialogTree | null;
   activeNodeId: string | null;
   isDialogOpen: boolean;
 
-  // Comunidad activa (Fases 2-3)
-  activeCommunityLevel: number | null; // 1-5
+  // Comunidad activa en mapa/escena
+  activeCommunityLevel: number | null;
 };
 
 // ─── Estado inicial ───────────────────────────────────────────────────────────
@@ -113,6 +112,8 @@ export const INITIAL_GAME_STATE: GameState = {
   isMissionPanelOpen: false,
   inventory: [],
   achievements: [],
+  isInventoryOpen: false,
+  toastAchievement: null,
   activeDialog: null,
   activeNodeId: null,
   isDialogOpen: false,
