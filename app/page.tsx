@@ -19,23 +19,41 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* ── Game banner ── */}
-      <Link
-        href="/juego"
-        className="flex-shrink-0 flex items-center justify-center gap-2 py-2.5 px-4 active:opacity-80 transition-opacity"
-        style={{
-          background: 'linear-gradient(90deg, #0D0D1A 0%, #1a0a2e 50%, #0D0D1A 100%)',
-          borderBottom: '1px solid rgba(242,193,78,0.2)',
-        }}
+      {/* ── Game banners ── */}
+      <div
+        className="flex-shrink-0 flex"
+        style={{ borderBottom: '1px solid rgba(242,193,78,0.2)' }}
       >
-        <span
-          className="font-game text-[#F2C14E] text-base tracking-widest"
-          style={{ textShadow: '0 0 12px rgba(242,193,78,0.6)' }}
+        {/* Juego 2D */}
+        <Link
+          href="/juego"
+          className="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 active:opacity-80 transition-opacity"
+          style={{ background: 'linear-gradient(90deg, #0D0D1A 0%, #1a0a2e 100%)' }}
         >
-          🎮 La Sierra en Juego
-        </span>
-        <span className="text-[#F2C14E]/50 text-sm">→</span>
-      </Link>
+          <span
+            className="font-game text-[#F2C14E] text-sm tracking-widest"
+            style={{ textShadow: '0 0 10px rgba(242,193,78,0.5)' }}
+          >
+            🎮 La Sierra 2D
+          </span>
+        </Link>
+        {/* Separador */}
+        <div style={{ width: 1, background: 'rgba(242,193,78,0.15)' }} />
+        {/* Juego 3D */}
+        <Link
+          href="/juego3d"
+          className="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 active:opacity-80 transition-opacity"
+          style={{ background: 'linear-gradient(90deg, #1a0a2e 0%, #0D1A0D 100%)' }}
+        >
+          <span
+            className="font-game text-[#2FB89A] text-sm tracking-widest"
+            style={{ textShadow: '0 0 10px rgba(47,184,154,0.5)' }}
+          >
+            🌐 La Sierra 3D
+          </span>
+          <span className="text-[10px] text-[#2FB89A]/50 font-body">NUEVO</span>
+        </Link>
+      </div>
 
       {/* ── Main board ── */}
       <main className="flex flex-col flex-1 overflow-hidden">
