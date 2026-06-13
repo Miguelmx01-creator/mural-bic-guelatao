@@ -54,13 +54,20 @@ export default function NivelJuego({ jugador, nivel, onCompletado, onSalir }: Pr
 
   // ── Pantalla de victoria ──────────────────────────────────────────────────
   if (victoria) {
+    const esRepaso = jugador.nivelActual > nivel;
+    const etiquetaBoton = esRepaso
+      ? '↩ VOLVER AL MAPA'
+      : nivel >= 5
+        ? '🏆 VER RANKING'
+        : 'SIGUIENTE NIVEL →';
+
     return (
       <div
         className="min-h-screen flex flex-col items-center justify-center px-6 py-10 text-center"
         style={{ background: 'radial-gradient(ellipse at top, #1a0a2e 0%, #0D0D1A 60%)' }}
       >
         <p className="text-[#2FB89A] text-xs font-bold tracking-[0.2em] uppercase mb-4">
-          ¡Nivel {nivel} completado!
+          {esRepaso ? '¡Rejugaste el nivel!' : `¡Nivel ${nivel} completado!`}
         </p>
         <div className="text-5xl mb-3">{comunidad.emoji}</div>
         <h2 className="font-game text-white text-2xl mb-1">{comunidad.nombre}</h2>
@@ -97,8 +104,13 @@ export default function NivelJuego({ jugador, nivel, onCompletado, onSalir }: Pr
           className="font-game text-[#0D0D1A] py-4 px-8 rounded-2xl text-lg tracking-wider active:scale-95 transition-transform"
           style={{ background: '#F2C14E', boxShadow: '0 4px 24px rgba(242,193,78,0.4)' }}
         >
-          {nivel >= 5 ? '🏆 VER RANKING' : 'SIGUIENTE NIVEL →'}
+          {etiquetaBoton}
         </button>
+        {esRepaso && (
+          <p className="text-white/35 text-xs mt-4">
+            +{total} pts sumados a tu marcador ✓
+          </p>
+        )}
       </div>
     );
   }

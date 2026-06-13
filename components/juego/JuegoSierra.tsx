@@ -28,6 +28,9 @@ export default function JuegoSierra() {
   async function handleNivelCompletado(puntosGanados: number) {
     if (!jugador || nivelActivo === null) return;
 
+    // Primera vez que completa el nivel 5 → ir directo al ranking
+    const completaJuego = nivelActivo === 5 && jugador.nivelActual === 5;
+
     // Actualización optimista inmediata
     const optimista: Jugador = {
       ...jugador,
@@ -36,7 +39,7 @@ export default function JuegoSierra() {
     };
     setJugador(optimista);
     setNivelActivo(null);
-    setVista('mapa');
+    setVista(completaJuego ? 'ranking' : 'mapa');
 
     // Sincronizar con Firestore en segundo plano
     try {

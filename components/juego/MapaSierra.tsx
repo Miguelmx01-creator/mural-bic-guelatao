@@ -81,7 +81,7 @@ export default function MapaSierra({ jugador, onVerRanking, onJugarNivel }: Prop
               return (
                 <div
                   key={lvl.nivel}
-                  className={`flex items-center gap-5 ${isRight ? 'flex-row-reverse' : ''} ${jugable ? 'cursor-pointer' : ''}`}
+                  className={`flex items-center gap-5 ${isRight ? 'flex-row-reverse' : ''} ${jugable ? 'cursor-pointer active:opacity-60 transition-opacity' : ''}`}
                   onClick={jugable ? () => onJugarNivel(lvl.nivel) : undefined}
                 >
                   {/* Nodo */}
