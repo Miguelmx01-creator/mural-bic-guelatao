@@ -22,27 +22,37 @@ function Montana({
   );
 }
 
-// ─── Árbol del mapa (escala mapa-tablero, 0.3 u altura total) ────────────────
-function MapTree({ position }: { position: [number, number, number] }) {
+// ─── Árbol del mapa — cluster de follaje irregular, múltiples verdes ─────────
+const TREE_ROT = [0.4, 1.3, 2.2, 0.9, 1.7];
+
+function MapTree({ position, rotY = 0 }: { position: [number, number, number]; rotY?: number }) {
   return (
-    <group position={position}>
-      <mesh position={[0, 0.1, 0]}>
-        <cylinderGeometry args={[0.04, 0.06, 0.22, 5]} />
-        <meshToonMaterial color="#4A2D10" />
+    <group position={position} rotation={[0, rotY, 0]}>
+      {/* Tronco */}
+      <mesh position={[0, 0.1, 0]} castShadow>
+        <cylinderGeometry args={[0.03, 0.06, 0.22, 5]} />
+        <meshStandardMaterial color="#3A2010" roughness={0.95} />
       </mesh>
-      <mesh position={[0, 0.38, 0]}>
-        <coneGeometry args={[0.22, 0.44, 5]} />
-        <meshToonMaterial color="#1B5E20" />
+      {/* Follaje base — verde pino oscuro, inclinado */}
+      <mesh position={[0.02, 0.36, -0.01]} rotation={[0.07, 0.8, -0.04]} castShadow>
+        <coneGeometry args={[0.22, 0.36, 5]} />
+        <meshStandardMaterial color="#1B4E18" roughness={0.9} />
       </mesh>
-      <mesh position={[0, 0.63, 0]}>
-        <coneGeometry args={[0.14, 0.35, 5]} />
-        <meshToonMaterial color="#2E7D32" />
+      {/* Follaje medio — esmeralda */}
+      <mesh position={[-0.02, 0.59, 0.02]} rotation={[-0.05, 1.3, 0.05]} castShadow>
+        <coneGeometry args={[0.14, 0.28, 5]} />
+        <meshStandardMaterial color="#2D6A22" roughness={0.9} />
+      </mesh>
+      {/* Acento oliva — rompe simetría */}
+      <mesh position={[0.09, 0.47, 0.08]} castShadow>
+        <sphereGeometry args={[0.08, 4, 3]} />
+        <meshStandardMaterial color="#3A6020" roughness={0.9} />
       </mesh>
     </group>
   );
 }
 
-// ─── Parche de bosque (cluster de árboles) ────────────────────────────────────
+// ─── Parche de bosque (cluster de árboles irregulares) ────────────────────────
 function BosqueCluster({
   cx,
   cz,
@@ -59,7 +69,7 @@ function BosqueCluster({
   return (
     <>
       {offsets.map(([dx, dz], i) => (
-        <MapTree key={i} position={[cx + dx, 0, cz + dz]} />
+        <MapTree key={i} position={[cx + dx, 0, cz + dz]} rotY={TREE_ROT[i]} />
       ))}
     </>
   );
@@ -178,7 +188,7 @@ export default function SierraTerrain() {
       ))}
 
       {/* ── Niebla de sierra ──────────────────────────────────────────────── */}
-      <fog attach="fog" args={['#0A1205', 14, 26]} />
+      <fog attach="fog" args={['#060d0a', 5, 20]} />
     </>
   );
 }

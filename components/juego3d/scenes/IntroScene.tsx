@@ -11,7 +11,7 @@ import JaguarGuide3D from '../characters/JaguarGuide3D';
 import { useGame } from '../engine/GameContext';
 import { DIALOG_INTRO } from '@/lib/dialogs';
 
-// ─── Árbol de pino low-poly ────────────────────────────────────────────────────
+// ─── Árbol de pino — cluster escultórico, follaje irregular de múltiples verdes ─
 function PinoLowPoly({
   position,
   scale = 1,
@@ -22,24 +22,34 @@ function PinoLowPoly({
   return (
     <group position={position} scale={scale}>
       {/* Tronco */}
-      <mesh position={[0, -0.4, 0]} castShadow>
-        <cylinderGeometry args={[0.08, 0.1, 0.6, 5]} />
-        <meshToonMaterial color="#5C3A1E" />
+      <mesh position={[0, -0.4, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[0.07, 0.11, 0.65, 5]} />
+        <meshStandardMaterial color="#3D2010" roughness={0.95} />
       </mesh>
-      {/* Copa inferior */}
-      <mesh position={[0, 0.15, 0]} castShadow>
-        <coneGeometry args={[0.55, 0.9, 6]} />
-        <meshToonMaterial color="#1B5E20" />
+      {/* Masa base — verde pino oscuro, inclinada */}
+      <mesh position={[0.05, 0.12, -0.04]} rotation={[0.08, 0.6, -0.05]} castShadow>
+        <coneGeometry args={[0.58, 0.82, 6]} />
+        <meshStandardMaterial color="#1E5018" roughness={0.9} />
       </mesh>
-      {/* Copa media */}
-      <mesh position={[0, 0.65, 0]} castShadow>
-        <coneGeometry args={[0.4, 0.75, 5]} />
-        <meshToonMaterial color="#2E7D32" />
+      {/* Capa media — esmeralda, eje distinto */}
+      <mesh position={[-0.06, 0.56, 0.07]} rotation={[-0.07, 1.1, 0.06]} castShadow>
+        <coneGeometry args={[0.43, 0.68, 5]} />
+        <meshStandardMaterial color="#2D6B22" roughness={0.9} />
       </mesh>
-      {/* Copa superior */}
-      <mesh position={[0, 1.05, 0]} castShadow>
-        <coneGeometry args={[0.22, 0.6, 5]} />
-        <meshToonMaterial color="#388E3C" />
+      {/* Esfera oliva — rompe la simetría */}
+      <mesh position={[-0.2, 0.52, 0.16]} castShadow>
+        <sphereGeometry args={[0.2, 5, 4]} />
+        <meshStandardMaterial color="#3B6020" roughness={0.9} />
+      </mesh>
+      {/* Copa superior asimétrica */}
+      <mesh position={[0.04, 0.97, -0.04]} rotation={[0.1, 0.4, 0.09]} castShadow>
+        <coneGeometry args={[0.24, 0.52, 5]} />
+        <meshStandardMaterial color="#3E8028" roughness={0.9} />
+      </mesh>
+      {/* Mini brote — pino quemado oscuro */}
+      <mesh position={[0.18, 0.78, 0.13]} rotation={[0.15, -0.5, -0.1]} castShadow>
+        <coneGeometry args={[0.11, 0.28, 4]} />
+        <meshStandardMaterial color="#28451A" roughness={0.9} />
       </mesh>
     </group>
   );
@@ -153,20 +163,24 @@ export default function IntroScene() {
         target={[0, 0, 0]}
       />
 
-      {/* ── Iluminación ─────────────────────────────────────────────────── */}
-      <ambientLight intensity={0.35} color="#3A2060" />
+      {/* ── Iluminación cinemática — bosque noche serrana ────────────────── */}
+      <ambientLight intensity={0.3} color="#121224" />
       <directionalLight
-        position={[5, 8, 3]}
-        intensity={0.9}
-        color="#FFF8E7"
+        position={[-5, 9, 4]}
+        intensity={1.2}
+        color="#a3b8cc"
         castShadow
         shadow-mapSize={[512, 512]}
-        shadow-camera-far={30}
+        shadow-camera-far={35}
+        shadow-camera-left={-15}
+        shadow-camera-right={15}
+        shadow-camera-top={15}
+        shadow-camera-bottom={-15}
       />
-      {/* Luz de luna */}
-      <pointLight position={[-8, 10, -5]} intensity={0.4} color="#7B9EC4" />
-      {/* Luz cálida cerca del jaguar */}
-      <pointLight position={[0, 1.5, 1]} intensity={0.6} color="#F2C14E" distance={6} />
+      {/* Luna — lateral fría, genera sombras duras */}
+      <pointLight position={[-10, 12, -6]} intensity={0.5} color="#5a7aaa" />
+      {/* Calor de Kimi — foco cálido bajo */}
+      <pointLight position={[0, 1.2, 1]} intensity={0.9} color="#F2C14E" distance={5} />
 
       {/* ── Suelo ────────────────────────────────────────────────────────── */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.55, 0]} receiveShadow>
@@ -217,7 +231,7 @@ export default function IntroScene() {
       <Luciernagas count={35} />
 
       {/* ── Foggy atmosphere (niebla de la sierra) ───────────────────────── */}
-      <fog attach="fog" args={['#0D1A0D', 12, 28]} />
+      <fog attach="fog" args={['#060a14', 5, 20]} />
     </>
   );
 }
