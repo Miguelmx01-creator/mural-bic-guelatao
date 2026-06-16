@@ -15,7 +15,6 @@ export type ComunidadInfo = {
 };
 
 // ─── Temas del 2° parcial — Lenguas Indígenas BIC 01 Guelatao ──────────────
-// Contenido basado en arena-jaguar-web y materiales del segundo semestre.
 
 export const COMUNIDADES: ComunidadInfo[] = [
   {
@@ -122,11 +121,11 @@ export type PreguntaComunidadQuiz = {
   labelDato:         string;
   dato:              string;
   respuestaCorrecta: string;
-  opciones:          string[]; // 4 nombres, barajados
+  opciones:          string[];
 };
 
 export function generarComunidadQuiz(nivel: number): PreguntaComunidadQuiz {
-  const com  = COMUNIDADES[nivel - 1];
+  const com   = COMUNIDADES[nivel - 1];
   const campo = shuffle(reales(com.datos))[0];
   const otros = shuffle(COMUNIDADES.filter(c => c.nivel !== nivel).map(c => c.nombre)).slice(0, 3);
   return {
@@ -158,16 +157,16 @@ export function generarImpostor(nivel: number): PreguntaImpostor {
   const campos = shuffle(reales(com.datos)).slice(0, 3);
   const usados = new Set(campos);
 
-  let impostorLabel    = '';
-  let impostorValor    = '';
+  let impostorLabel     = '';
+  let impostorValor     = '';
   let impostorComunidad = '';
 
   for (const otra of shuffle(COMUNIDADES.filter(c => c.nivel !== nivel))) {
     const disponibles = reales(otra.datos).filter(k => !usados.has(k));
     if (disponibles.length > 0) {
-      const k          = shuffle(disponibles)[0];
-      impostorLabel    = LABELS[k];
-      impostorValor    = trunc(otra.datos[k], 90);
+      const k           = shuffle(disponibles)[0];
+      impostorLabel     = LABELS[k];
+      impostorValor     = trunc(otra.datos[k], 90);
       impostorComunidad = otra.nombre;
       break;
     }
@@ -192,12 +191,12 @@ export function generarImpostor(nivel: number): PreguntaImpostor {
   };
 }
 
-// ─── Tipo 3: SpeedSierra
+// ─── Tipo 3: Speed Sierra ───────────────────────────────────────────────────
 
 export type PreguntaVelocidad = {
   label:     string;
   valor:     string;
-  respuesta: boolean; // true = Sí, false = No
+  respuesta: boolean;
 };
 
 export type PreguntaSpeed = {
@@ -210,12 +209,10 @@ export function generarSpeedSierra(nivel: number): PreguntaSpeed {
   const com   = COMUNIDADES[nivel - 1];
   const otras = COMUNIDADES.filter(c => c.nivel !== nivel);
 
-  // 3 verdaderas
   const verdaderas: PreguntaVelocidad[] = shuffle(reales(com.datos))
     .slice(0, 3)
     .map(k => ({ label: LABELS[k], valor: trunc(com.datos[k], 70), respuesta: true }));
 
-  // 2 falsas (mismo campo pero valor de otra comunidad)
   const falsas: PreguntaVelocidad[] = [];
   for (const campo of shuffle(reales(com.datos))) {
     if (falsas.length >= 2) break;
@@ -226,16 +223,6 @@ export function generarSpeedSierra(nivel: number): PreguntaSpeed {
       label:     LABELS[campo],
       valor:     trunc(otra.datos[campo], 70),
       respuesta: false,
-    });
-  }
-
-  return {
-    tipo:      'speed-sierra',
-    comunidad: com.nombre,
-    preguntas: shuffle([...verdaderas, ...falsas]).slice(0, 5),
-  };
-}
-,
     });
   }
 
