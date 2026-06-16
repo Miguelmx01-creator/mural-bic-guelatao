@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useMemo, useEffect, Suspense } from 'react';
+import { useRef, useMemo, useEffect, Suspense, Component, type ReactNode } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { OrbitControls, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
@@ -8,6 +8,16 @@ import { useGame } from '../engine/GameContext';
 import { DIALOG_INTRO } from '@/lib/dialogs';
 
 const INTRO_SCENE_PATH = '/models/environment/intro_scene.glb';
+
+// ─── Error boundary para GLB faltante ────────────────────────────────────────
+class GLBErrorBoundary extends Component<
+  { children: ReactNode; fallback: ReactNode },
+  { error: boolean }
+> {
+  state = { error: false };
+  static getDerivedStateFromError() { return { error: true }; }
+  render() { return this.state.error ? this.props.fallback : this.props.children; }
+}
 
 // ─── Luciérnagas (partículas — se mantienen procedurales) ────────────────────
 function Luciernagas({ count = 40 }: { count?: number }) {
@@ -138,9 +148,11 @@ export default function IntroScene() {
       <fog attach="fog" args={['#060a14', 5, 20]} />
 
       {/* ── Entorno 3D — sin personaje ───────────────────────────────────── */}
-      <Suspense fallback={<Loader3D />}>
-        <IntroEnvironment />
-      </Suspense>
+      <GLBErrorBoundary fallback={null}>
+        <Suspense fallback={<Loader3D />}>
+          <IntroEnvironment />
+        </Suspense>
+      </GLBErrorBoundary>
 
       {/* ── Luciérnagas — procedurales, no bloquean la carga ─────────────── */}
       <Luciernagas count={35} />

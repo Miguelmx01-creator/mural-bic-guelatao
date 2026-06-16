@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, Suspense } from 'react';
+import { useRef, useEffect, Suspense, Component, type ReactNode } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { OrbitControls, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
@@ -56,6 +56,16 @@ const COMMUNITY_LIGHTING: Record<number, LightingConfig> = {
     fog:         ['#051510', 12, 24],
   },
 };
+
+// ─── Error boundary para GLB faltante ────────────────────────────────────────
+class GLBErrorBoundary extends Component<
+  { children: ReactNode; fallback: ReactNode },
+  { error: boolean }
+> {
+  state = { error: false };
+  static getDerivedStateFromError() { return { error: true }; }
+  render() { return this.state.error ? this.props.fallback : this.props.children; }
+}
 
 // ─── Fallback mientras el GLB de la comunidad carga ──────────────────────────
 function Loader3D() {
@@ -158,9 +168,11 @@ export default function CommunityScene3D() {
         target={[0, 0.3, 0]}
       />
 
-      <Suspense fallback={<Loader3D />}>
-        <CommunityEnvironment nivel={nivel} />
-      </Suspense>
+      <GLBErrorBoundary fallback={null}>
+        <Suspense fallback={<Loader3D />}>
+          <CommunityEnvironment nivel={nivel} />
+        </Suspense>
+      </GLBErrorBoundary>
     </>
   );
 }
