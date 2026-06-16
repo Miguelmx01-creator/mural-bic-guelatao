@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { type PreguntaComunidadQuiz } from '@/lib/preguntas';
 
-const TIEMPO_TOTAL = 10;
+const TIEMPO_TOTAL = 25;
 
 interface Props {
   pregunta:   PreguntaComunidadQuiz;

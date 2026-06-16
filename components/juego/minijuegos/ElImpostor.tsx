@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { type PreguntaImpostor } from '@/lib/preguntas';
 
-const TIEMPO_TOTAL = 12;
+const TIEMPO_TOTAL = 25;
 
 interface Props {
   pregunta:   PreguntaImpostor;

@@ -1,8 +1,8 @@
 // ─── Tipos base ────────────────────────────────────────────────────────────
 
 export type CampoKey =
-  | 'lengua' | 'ubicacion' | 'gobierno' | 'fiesta'
-  | 'gastronomia' | 'ambiente' | 'problema' | 'propuesta';
+  | 'frase' | 'significado' | 'uso' | 'concepto'
+  | 'derecho' | 'variante' | 'riesgo' | 'accion';
 
 export type ComunidadDatos = Record<CampoKey, string>;
 
@@ -14,72 +14,73 @@ export type ComunidadInfo = {
   datos:  ComunidadDatos;
 };
 
-// ─── Datos de las 5 comunidades ────────────────────────────────────────────
+// ─── Temas del 2° parcial — Lenguas Indígenas BIC 01 Guelatao ──────────────
+// Contenido basado en arena-jaguar-web y materiales del segundo semestre.
 
 export const COMUNIDADES: ComunidadInfo[] = [
   {
-    nivel: 1, nombre: 'Capulalpam de Méndez', emoji: '🏔️', color: '#F2C14E',
+    nivel: 1, nombre: 'Saludos e Identidad', emoji: '🗣️', color: '#F2C14E',
     datos: {
-      lengua:      'Zapoteco (pocos hablantes activos)',
-      ubicacion:   'Distrito de Ixtlán de Juárez, 67 km de Oaxaca',
-      gobierno:    'Usos y costumbres, proyectos comunales en asamblea',
-      fiesta:      'San Mateo Apóstol y Evangelista, 10 de septiembre',
-      gastronomia: 'Jaripeo, baile popular, eventos deportivos en la fiesta',
-      ambiente:    'Turismo comunitario controlado por la asamblea',
-      problema:    'Sobreturismo e invasión de inversionistas externos',
-      propuesta:   'Mantener control comunal sobre proyectos turísticos',
+      frase:       'Padiux — saludo general (buenos días, tardes y noches)',
+      significado: 'Nagallagchhu = hasta luego; Bi nziu = ¿cómo te llamas?; Nada nzia = yo me llamo',
+      uso:         'Inicio y cierre de cualquier interacción cotidiana en la comunidad',
+      concepto:    'Una lengua no solo comunica: también transmite identidad, memoria y formas de ver el mundo',
+      derecho:     'Hablar en lengua indígena en cualquier espacio público o escolar es un derecho reconocido',
+      variante:    'Zapoteco serrano, variante Sierra Norte (BIC 01 Guelatao de Juárez)',
+      riesgo:      'La vergüenza lingüística provoca que los jóvenes dejen de hablar su lengua',
+      accion:      'Usar la lengua para saludar y presentarse en el aula y con la familia',
     },
   },
   {
-    nivel: 2, nombre: 'Chicomezuchil', emoji: '🌿', color: '#2FB89A',
+    nivel: 2, nombre: 'Permisos e Interacción Real', emoji: '🤝', color: '#2FB89A',
     datos: {
-      lengua:      'Zapoteco (lengua principal)',
-      ubicacion:   'San Juan Chicomezuchil, Sierra Norte',
-      gobierno:    'Usos y costumbres, asamblea comunitaria, tequio obligatorio',
-      fiesta:      'Sin dato registrado',
-      gastronomia: 'Sin dato registrado',
-      ambiente:    'Familia como base, varias generaciones conviven',
-      problema:    'Migración de jóvenes a Oaxaca, CDMX o USA por falta de universidad',
-      propuesta:   'Educación accesible para evitar la migración forzada',
+      frase:       'Frases para pedir permiso y comunicarse en situaciones escolares cotidianas',
+      significado: 'Ga bi lhe = ¿de dónde eres?; Nada naka bi = yo soy de; Bal yizu = ¿cuántos años tienes?',
+      uso:         'Interacciones reales en el aula, la comunidad y situaciones escolares formales',
+      concepto:    'La lengua vive cuando se usa en situaciones reales, no solo en ceremonias o festividades',
+      derecho:     'Los estudiantes tienen derecho a usar su lengua indígena en instituciones educativas',
+      variante:    'Zapoteco serrano — las frases varían ligeramente entre comunidades de la Sierra Norte',
+      riesgo:      'El desuso escolar limita la lengua al espacio doméstico y acelera su pérdida',
+      accion:      'Integrar frases de permiso y presentación en la rutina escolar diaria',
     },
   },
   {
-    nivel: 3, nombre: 'El Huamuchil', emoji: '🌽', color: '#E5532E',
+    nivel: 3, nombre: 'Variantes y Metodología Experto-Aprendiz', emoji: '📖', color: '#E5532E',
     datos: {
-      lengua:      'Mixteco variante baja (solo personas mayores)',
-      ubicacion:   'Santiago Amoltepec, Sola de Vega, 234 km de Oaxaca',
-      gobierno:    'Usos y costumbres, ciudadanos obligados a servir cargos',
-      fiesta:      'Virgen de la Candelaria, febrero (basketball, calenda, jaripeo)',
-      gastronomia: 'Caldo de res, rojo de pollo, tamal de calabaza, tepache de caña, mezcal',
-      ambiente:    'Cerro mole, cerro del templo, 3 manantiales, clima 15-24°C',
-      problema:    'Migración masiva desde 1980 hacia California y Washington',
-      propuesta:   'Proyectos productivos para retener a las personas',
+      frase:       'Forma registrada por el Experto — no existe una única forma correcta',
+      significado: 'Variante lingüística: forma de hablar una lengua según la comunidad o región',
+      uso:         'Reconocer que cada comunidad tiene su propia variante válida del zapoteco',
+      concepto:    'Metodología Experto-Aprendiz: el hablante mayor orienta el aprendizaje sin imponer un estándar único',
+      derecho:     'Todas las variantes lingüísticas tienen igual valor y deben respetarse sin jerarquías',
+      variante:    'Múltiples variantes del Zapoteco serrano coexisten en la Sierra Norte de Oaxaca',
+      riesgo:      'Imponer una sola variante como correcta desvaloriza las demás y debilita la diversidad lingüística',
+      accion:      'Escuchar al Experto-Aprendiz sin corregir su variante; documentar con respeto',
     },
   },
   {
-    nivel: 4, nombre: 'Guelatao de Juárez', emoji: '⭐', color: '#F2C14E',
+    nivel: 4, nombre: 'Derechos Lingüísticos', emoji: '⚖️', color: '#9BB8D4',
     datos: {
-      lengua:      'Zapoteco (hablantes migraron, ya no es mayoría)',
-      ubicacion:   'Municipio de Ixtlán de Juárez, 60 km de Oaxaca',
-      gobierno:    'Ayuntamiento municipal, asambleas comunitarias participativas',
-      fiesta:      'Copa Benito Juárez (torneo deportivo intercomunidades)',
-      gastronomia: 'Sin dato específico registrado',
-      ambiente:    'Laguna Encantada, bosques Sierra Juárez, senderos ecoturísticos',
-      problema:    'Falta de médicos y hospitales especializados, falta de agua',
-      propuesta:   'Proteger manantiales y mejorar distribución de agua',
+      frase:       'Las lenguas indígenas son lenguas nacionales con la misma validez jurídica que el español',
+      significado: 'Ley General de Derechos Lingüísticos (2003) — dio origen al INALI',
+      uso:         'Marco legal para proteger el uso de lenguas indígenas en trámites y servicios públicos',
+      concepto:    'Discriminación lingüística: negar atención o burlarse de quien habla su lengua es una violación de derechos',
+      derecho:     'Art. 2° Constitucional + Ley General de Derechos Lingüísticos + Convenio 169 OIT (1989)',
+      variante:    'Aplica a las 68 agrupaciones lingüísticas de México y sus más de 364 variantes',
+      riesgo:      'La discriminación lingüística en instituciones provoca vergüenza y abandono de la lengua',
+      accion:      'Exigir atención en lengua indígena en trámites, escuelas y servicios de salud',
     },
   },
   {
-    nivel: 5, nombre: 'San Cristóbal Lachirioag', emoji: '🎶', color: '#2FB89A',
+    nivel: 5, nombre: 'Comunidad y Revitalización', emoji: '🌱', color: '#2FB89A',
     datos: {
-      lengua:      'Xhon del Zapoteco (100% de la población, forma oral)',
-      ubicacion:   'Distrito de Villa Alta, 140 km de Oaxaca',
-      gobierno:    'Sistema Normativo Interno, 6 cargos obligatorios por ciudadano',
-      fiesta:      '19-25 de noviembre: calenda, danzas, basketball, fuegos artificiales',
-      gastronomia: 'Caldo de res (nhiskuan), tamales de frijol con hoja de aguacate, tamal de tres picos, tepache dulce',
-      ambiente:    '3 microclimas, 5 manantiales, Yiawiz cerro sagrado prehispánico',
-      problema:    'Despoblación, migración, brecha digital generacional',
-      propuesta:   'Talleres de oficios y espacios culturales para retener jóvenes',
+      frase:       'Revitalizar una lengua es fortalecerla mediante enseñanza, grabaciones y participación comunitaria',
+      significado: 'Desplazamiento lingüístico: proceso por el que una comunidad abandona su lengua en favor de otra',
+      uso:         'Estrategias comunitarias para recuperar el uso cotidiano de la lengua entre jóvenes',
+      concepto:    'Transmisión intergeneracional: los padres y abuelos enseñan la lengua a las nuevas generaciones',
+      derecho:     'Las comunidades tienen derecho a transmitir su lengua, cultura e identidad a futuras generaciones',
+      variante:    'Zapoteco, Mixteco, Mixe y Chinanteco: familias lingüísticas de la Sierra Norte de Oaxaca',
+      riesgo:      'La interrupción de la transmisión intergeneracional es la principal causa de muerte de una lengua',
+      accion:      'Misión Palabras que Viven: documentar palabras y frases con personas mayores de la comunidad',
     },
   },
 ];
@@ -87,14 +88,14 @@ export const COMUNIDADES: ComunidadInfo[] = [
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 const LABELS: Record<CampoKey, string> = {
-  lengua:      'Lengua',
-  ubicacion:   'Ubicación',
-  gobierno:    'Gobierno',
-  fiesta:      'Fiesta principal',
-  gastronomia: 'Gastronomía',
-  ambiente:    'Entorno natural',
-  problema:    'Problema principal',
-  propuesta:   'Propuesta de mejora',
+  frase:       'Frase en zapoteco',
+  significado: 'Significado',
+  uso:         'Contexto de uso',
+  concepto:    'Concepto clave',
+  derecho:     'Derecho lingüístico',
+  variante:    'Variante / lengua',
+  riesgo:      'Factor de riesgo',
+  accion:      'Acción revitalizadora',
 };
 
 export function shuffle<T>(arr: T[]): T[] {
@@ -191,46 +192,4 @@ export function generarImpostor(nivel: number): PreguntaImpostor {
   };
 }
 
-// ─── Tipo 3: Speed Sierra ───────────────────────────────────────────────────
-
-export type PreguntaVelocidad = {
-  label:     string;
-  valor:     string;
-  respuesta: boolean; // true = Sí, false = No
-};
-
-export type PreguntaSpeed = {
-  tipo:      'speed-sierra';
-  comunidad: string;
-  preguntas: PreguntaVelocidad[];
-};
-
-export function generarSpeedSierra(nivel: number): PreguntaSpeed {
-  const com   = COMUNIDADES[nivel - 1];
-  const otras = COMUNIDADES.filter(c => c.nivel !== nivel);
-
-  // 3 verdaderas
-  const verdaderas: PreguntaVelocidad[] = shuffle(reales(com.datos))
-    .slice(0, 3)
-    .map(k => ({ label: LABELS[k], valor: trunc(com.datos[k], 70), respuesta: true }));
-
-  // 2 falsas (mismo campo pero valor de otra comunidad)
-  const falsas: PreguntaVelocidad[] = [];
-  for (const campo of shuffle(reales(com.datos))) {
-    if (falsas.length >= 2) break;
-    const candidatos = otras.filter(o => !o.datos[campo].includes('Sin dato'));
-    if (candidatos.length === 0) continue;
-    const otra = shuffle(candidatos)[0];
-    falsas.push({
-      label:     LABELS[campo],
-      valor:     trunc(otra.datos[campo], 70),
-      respuesta: false,
-    });
-  }
-
-  return {
-    tipo:      'speed-sierra',
-    comunidad: com.nombre,
-    preguntas: shuffle([...verdaderas, ...falsas]).slice(0, 5),
-  };
-}
+// ─── Tipo 3: Speed
