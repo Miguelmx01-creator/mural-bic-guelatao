@@ -154,10 +154,10 @@ export default function CommunityInfoPanel() {
                 className="rounded-xl p-3.5 mb-4 flex flex-col gap-2"
                 style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}
               >
-                <InfoRow label="Lengua:" value={com.datos.lengua} />
-                <InfoRow label="Ubicación:" value={com.datos.ubicacion} />
-                <InfoRow label="Ambiente:" value={com.datos.ambiente} />
-                <InfoRow label="Problema:" value={com.datos.problema} />
+                <InfoRow label="Variante:" value={com.datos.variante} />
+                <InfoRow label="Frase:" value={com.datos.frase} />
+                <InfoRow label="Concepto:" value={com.datos.concepto} />
+                <InfoRow label="Riesgo:" value={com.datos.riesgo} />
               </div>
 
               {/* Botón de acción */}
