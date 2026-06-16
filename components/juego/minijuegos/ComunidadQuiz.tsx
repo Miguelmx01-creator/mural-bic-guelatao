@@ -1,9 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { type PreguntaComunidadQuiz } from '@/lib/preguntas';
-
-const TIEMPO_TOTAL = 25;
 
 interface Props {
   pregunta:   PreguntaComunidadQuiz;
@@ -11,56 +9,19 @@ interface Props {
 }
 
 export default function ComunidadQuiz({ pregunta, onTerminar }: Props) {
-  const [timeLeft, setTimeLeft]       = useState(TIEMPO_TOTAL);
-  const [seleccion, setSeleccion]     = useState<string | null>(null);
-  const [resultado, setResultado]     = useState<'correcto' | 'incorrecto' | null>(null);
-
-  // Timer
-  useEffect(() => {
-    if (resultado !== null) return;
-    if (timeLeft <= 0) { resolver(''); return; }
-    const id = setTimeout(() => setTimeLeft(t => t - 1), 1000);
-    return () => clearTimeout(id);
-  }, [timeLeft, resultado]); // eslint-disable-line
+  const [seleccion, setSeleccion] = useState<string | null>(null);
+  const [resultado, setResultado] = useState<'correcto' | 'incorrecto' | null>(null);
 
   function resolver(opcion: string) {
     if (resultado !== null) return;
     const correcto = opcion === pregunta.respuestaCorrecta;
-    const bonus    = correcto && timeLeft > 5 ? 50 : 0;
     setSeleccion(opcion);
     setResultado(correcto ? 'correcto' : 'incorrecto');
-    setTimeout(() => onTerminar(correcto ? 100 + bonus : 0), 1800);
+    setTimeout(() => onTerminar(correcto ? 100 : 0), 1800);
   }
 
-  const pct  = (timeLeft / TIEMPO_TOTAL) * 100;
-  const rojo = timeLeft <= 4;
-
   return (
-    <div className="flex flex-col h-full px-4 pt-4 pb-6 gap-5">
-      {/* Timer */}
-      <div>
-        <div className="flex justify-between items-center mb-1.5">
-          <span className="text-white/40 text-[10px] uppercase tracking-widest">Tiempo</span>
-          <span
-            className="font-game text-lg leading-none"
-            style={{ color: rojo ? '#E5532E' : '#F2C14E' }}
-          >
-            {timeLeft}s
-          </span>
-        </div>
-        <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
-          <div
-            style={{
-              height: '100%',
-              width:  `${pct}%`,
-              background:  rojo ? '#E5532E' : '#F2C14E',
-              transition:  'width 1s linear, background 0.4s',
-              borderRadius: 'inherit',
-            }}
-          />
-        </div>
-      </div>
-
+    <div className="flex flex-col h-full px-4 pt-6 pb-6 gap-5">
       {/* Dato */}
       <div
         className="rounded-2xl px-5 py-4 flex-shrink-0"
@@ -73,7 +34,7 @@ export default function ComunidadQuiz({ pregunta, onTerminar }: Props) {
       </div>
 
       <p className="text-center text-white/40 text-xs tracking-wide">
-        ¿A qué comunidad pertenece este dato?
+        ¿A qué estación temática pertenece este concepto?
       </p>
 
       {/* Opciones */}
@@ -89,15 +50,9 @@ export default function ComunidadQuiz({ pregunta, onTerminar }: Props) {
 
           if (resultado !== null) {
             if (esCorrecta) {
-              bg     = 'rgba(47,184,154,0.15)';
-              border = '#2FB89A';
-              color  = '#2FB89A';
-              cls    = 'game-correct';
+              bg = 'rgba(47,184,154,0.15)'; border = '#2FB89A'; color = '#2FB89A'; cls = 'game-correct';
             } else if (esSeleccionada) {
-              bg     = 'rgba(229,83,46,0.15)';
-              border = '#E5532E';
-              color  = '#E5532E';
-              cls    = 'game-shake';
+              bg = 'rgba(229,83,46,0.15)'; border = '#E5532E'; color = '#E5532E'; cls = 'game-shake';
             } else {
               color = 'rgba(255,255,255,0.25)';
             }
@@ -120,13 +75,10 @@ export default function ComunidadQuiz({ pregunta, onTerminar }: Props) {
       {/* Feedback */}
       {resultado !== null && (
         <div className="text-center animate-pulse">
-          {resultado === 'correcto' ? (
-            <p className="font-game text-[#2FB89A] text-xl">
-              ✅ CORRECTO{timeLeft > 5 ? ' +50 bonus' : ''}
-            </p>
-          ) : (
-            <p className="font-game text-[#E5532E] text-xl">❌ INCORRECTO</p>
-          )}
+          {resultado === 'correcto'
+            ? <p className="font-game text-[#2FB89A] text-xl">CORRECTO</p>
+            : <p className="font-game text-[#E5532E] text-xl">INCORRECTO</p>
+          }
         </div>
       )}
     </div>
