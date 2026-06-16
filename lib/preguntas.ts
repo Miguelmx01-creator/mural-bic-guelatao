@@ -192,4 +192,56 @@ export function generarImpostor(nivel: number): PreguntaImpostor {
   };
 }
 
-// ─── Tipo 3: Speed
+// ─── Tipo 3: SpeedSierra
+
+export type PreguntaVelocidad = {
+  label:     string;
+  valor:     string;
+  respuesta: boolean; // true = Sí, false = No
+};
+
+export type PreguntaSpeed = {
+  tipo:      'speed-sierra';
+  comunidad: string;
+  preguntas: PreguntaVelocidad[];
+};
+
+export function generarSpeedSierra(nivel: number): PreguntaSpeed {
+  const com   = COMUNIDADES[nivel - 1];
+  const otras = COMUNIDADES.filter(c => c.nivel !== nivel);
+
+  // 3 verdaderas
+  const verdaderas: PreguntaVelocidad[] = shuffle(reales(com.datos))
+    .slice(0, 3)
+    .map(k => ({ label: LABELS[k], valor: trunc(com.datos[k], 70), respuesta: true }));
+
+  // 2 falsas (mismo campo pero valor de otra comunidad)
+  const falsas: PreguntaVelocidad[] = [];
+  for (const campo of shuffle(reales(com.datos))) {
+    if (falsas.length >= 2) break;
+    const candidatos = otras.filter(o => !o.datos[campo].includes('Sin dato'));
+    if (candidatos.length === 0) continue;
+    const otra = shuffle(candidatos)[0];
+    falsas.push({
+      label:     LABELS[campo],
+      valor:     trunc(otra.datos[campo], 70),
+      respuesta: false,
+    });
+  }
+
+  return {
+    tipo:      'speed-sierra',
+    comunidad: com.nombre,
+    preguntas: shuffle([...verdaderas, ...falsas]).slice(0, 5),
+  };
+}
+,
+    });
+  }
+
+  return {
+    tipo:      'speed-sierra',
+    comunidad: com.nombre,
+    preguntas: shuffle([...verdaderas, ...falsas]).slice(0, 5),
+  };
+}
