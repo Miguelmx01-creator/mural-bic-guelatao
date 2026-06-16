@@ -135,8 +135,8 @@ function reales(datos: ComunidadDatos): CampoKey[] {
   return (Object.keys(datos) as CampoKey[]).filter(k => !datos[k].includes('Sin dato'));
 }
 
-function trunc(s: string, n: number): string {
-  return s.length > n ? s.slice(0, n - 1) + '…' : s;
+function trunc(s: string, _n: number): string {
+  return s;
 }
 
 // ─── Tipo 1: ¿A qué estación pertenece? ────────────────────────────────────
