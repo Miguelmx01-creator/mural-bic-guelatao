@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { buscarOCrearJugador, type Jugador } from '@/lib/jugadores';
+import RankingSierra from './RankingSierra';
 
 interface Props {
   onLogin: (jugador: Jugador) => void;
@@ -10,10 +11,11 @@ interface Props {
 const SEMESTRES = ['Segundo', 'Cuarto', 'Sexto'];
 
 export default function LoginJugador({ onLogin }: Props) {
-  const [nombre, setNombre]   = useState('');
-  const [semestre, setSemestre] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState('');
+  const [nombre, setNombre]       = useState('');
+  const [semestre, setSemestre]   = useState('');
+  const [loading, setLoading]     = useState(false);
+  const [error, setError]         = useState('');
+  const [verRanking, setVerRanking] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -30,6 +32,10 @@ export default function LoginJugador({ onLogin }: Props) {
     }
   }
 
+  if (verRanking) {
+    return <RankingSierra jugadorActual={null} onVolver={() => setVerRanking(false)} />;
+  }
+
   return (
     <div
       className="min-h-screen flex items-center justify-center p-5"
@@ -39,7 +45,7 @@ export default function LoginJugador({ onLogin }: Props) {
         {/* Título */}
         <div className="text-center mb-8">
           <p className="text-[#2FB89A] text-xs font-bold tracking-[0.2em] uppercase mb-3">
-            Reto 2do Semestre
+            Lenguas Indígenas II
           </p>
           <h1
             className="font-game text-[#F2C14E] text-5xl leading-none tracking-wide"
@@ -123,6 +129,20 @@ export default function LoginJugador({ onLogin }: Props) {
             {loading ? 'CARGANDO...' : 'ENTRAR A LA SIERRA'}
           </button>
         </form>
+
+        {/* Botón ranking público */}
+        <button
+          onClick={() => setVerRanking(true)}
+          className="w-full mt-4 py-3 rounded-xl flex items-center justify-center gap-2 text-sm transition active:scale-[0.98]"
+          style={{
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(242,193,78,0.18)',
+            color: 'rgba(255,255,255,0.55)',
+          }}
+        >
+          <span>🏆</span>
+          <span className="font-game tracking-wider text-xs">VER RANKING GENERAL</span>
+        </button>
       </div>
     </div>
   );
